@@ -1,9 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import "./App.css";
 import defaultProductImage from "./images/default-product.png";
+import heroVideo from "./videos/hero-video.mp4";
+import eloriaLogo from "./images/eloria-logo.png";
 
 function App() {
-  const API_URL = process.env.REACT_APP_API_URL || "https://eloria-backend.onrender.com";
+  const API_URL =
+    process.env.REACT_APP_API_URL || "https://eloria-backend.onrender.com";
 
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
@@ -38,6 +41,9 @@ function App() {
   const [adminProductSearch, setAdminProductSearch] = useState("");
   const [adminStockFilter, setAdminStockFilter] = useState("all");
 
+  const [favorites, setFavorites] = useState([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -67,9 +73,10 @@ function App() {
       setLoading(true);
       const res = await fetch(`${API_URL}/products`);
       const data = await res.json();
-      setProducts(data);
+      setProducts(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
+      setProducts([]);
     } finally {
       setLoading(false);
     }
@@ -79,9 +86,10 @@ function App() {
     try {
       const res = await fetch(`${API_URL}/orders-with-items`);
       const data = await res.json();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
+      setOrders([]);
     }
   };
 
@@ -95,11 +103,21 @@ function App() {
       if (e.key === "Escape") {
         setSelectedProduct(null);
         setShowEditPopup(false);
+        setShowCart(false);
+        setShowCheckout(false);
+        setShowFavorites(false);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
+
+  useEffect(() => {
+    const savedFavorites = localStorage.getItem("eloria_favorites");
+    if (savedFavorites) {
+      setFavorites(JSON.parse(savedFavorites));
+    }
   }, []);
 
   const showToastMessage = (message, type = "success") => {
@@ -339,7 +357,11 @@ function App() {
   };
 
   const handleUpdateProduct = async () => {
-    if (!editingProduct?.name || !editingProduct?.price || !editingProduct?.stock) {
+    if (
+      !editingProduct?.name ||
+      !editingProduct?.price ||
+      !editingProduct?.stock
+    ) {
       showToastMessage("Please fill all required edit fields.", "error");
       return;
     }
@@ -535,6 +557,45 @@ function App() {
     showToastMessage("Filters cleared", "success");
   };
 
+  const toggleFavorite = (product) => {
+    const isAlreadyFavorite = favorites.some((item) => item.id === product.id);
+
+    let updatedFavorites;
+
+    if (isAlreadyFavorite) {
+      updatedFavorites = favorites.filter((item) => item.id !== product.id);
+      showToastMessage(`${product.name} removed from favorites`, "error");
+    } else {
+      updatedFavorites = [...favorites, product];
+      showToastMessage(`${product.name} added to favorites ❤️`, "success");
+    }
+
+    setFavorites(updatedFavorites);
+    localStorage.setItem("eloria_favorites", JSON.stringify(updatedFavorites));
+  };
+
+  const isFavorite = (productId) => {
+    return favorites.some((item) => item.id === productId);
+  };
+
+  const scrollToProducts = () => {
+    const featuredSection = document.getElementById("featured-products-section");
+    if (featuredSection) {
+      featuredSection.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleCategorySelect = (categoryId) => {
+    setSelectedCategory(categoryId);
+
+    const productsSection = document.getElementById("products-section");
+    if (productsSection) {
+      setTimeout(() => {
+        productsSection.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
+  };
+
   const totalPrice = cart.reduce(
     (total, item) => total + item.price * item.quantity,
     0
@@ -579,6 +640,11 @@ function App() {
       }
       return 0;
     });
+
+  const featuredProducts = useMemo(() => {
+    const shuffled = [...products].sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, 2);
+  }, [products]);
 
   const filteredAdminProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -686,7 +752,9 @@ function App() {
                 </p>
 
                 <div className="customer-info-box">
-                  <p><strong>Name:</strong> {order.customer_name}</p>
+                  <p>
+                    <strong>Name:</strong> {order.customer_name}
+                  </p>
 
                   <p>
                     <strong>Phone:</strong> {order.phone}{" "}
@@ -698,7 +766,9 @@ function App() {
                     </button>
                   </p>
 
-                  <p><strong>City:</strong> {order.city}</p>
+                  <p>
+                    <strong>City:</strong> {order.city}
+                  </p>
 
                   <p>
                     <strong>Address:</strong> {order.address}{" "}
@@ -722,7 +792,9 @@ function App() {
                   </button>
                 </div>
 
-                <p><strong>Total:</strong> {order.total_price} ₪</p>
+                <p>
+                  <strong>Total:</strong> {order.total_price} ₪
+                </p>
 
                 <p>
                   <strong>Status:</strong>{" "}
@@ -979,6 +1051,66 @@ function App() {
     );
   };
 
+  const renderStoreProductCard = (product) => (
+    <div
+      key={product.id}
+      className="product-card"
+      onClick={() => {
+        setSelectedProduct(product);
+        setSelectedImage(
+          product.image_url ||
+            product.image_url_2 ||
+            product.image_url_3 ||
+            defaultProductImage
+        );
+      }}
+    >
+      <button
+        className={`favorite-btn ${
+          isFavorite(product.id) ? "active-favorite" : ""
+        }`}
+        onClick={(e) => {
+          e.stopPropagation();
+          toggleFavorite(product);
+        }}
+      >
+        {isFavorite(product.id) ? "❤" : "♡"}
+      </button>
+
+      <div className="product-image-wrap">
+        <img
+          src={product.image_url || defaultProductImage}
+          alt={product.name}
+          className="product-image"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = defaultProductImage;
+          }}
+        />
+      </div>
+
+      <div className="product-card-body">
+        <h3>{product.name}</h3>
+        <p className="product-price">{product.price} ₪</p>
+
+        {product.stock === 0 && (
+          <span className="product-out-badge">Out of Stock</span>
+        )}
+
+        <button
+          className="add-cart-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            addToCart(product);
+          }}
+          disabled={product.stock === 0}
+        >
+          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+        </button>
+      </div>
+    </div>
+  );
+
   if (isAdmin) {
     return (
       <div className="admin-dashboard-layout">
@@ -986,28 +1118,38 @@ function App() {
           <div className="admin-sidebar-brand">ELORIA Admin</div>
 
           <button
-            className={adminView === "dashboard" ? "sidebar-link active" : "sidebar-link"}
+            className={
+              adminView === "dashboard" ? "sidebar-link active" : "sidebar-link"
+            }
             onClick={() => setAdminView("dashboard")}
           >
             Dashboard
           </button>
 
           <button
-            className={adminView === "orders" ? "sidebar-link active" : "sidebar-link"}
+            className={
+              adminView === "orders" ? "sidebar-link active" : "sidebar-link"
+            }
             onClick={() => setAdminView("orders")}
           >
             Orders
           </button>
 
           <button
-            className={adminView === "products" ? "sidebar-link active" : "sidebar-link"}
+            className={
+              adminView === "products" ? "sidebar-link active" : "sidebar-link"
+            }
             onClick={() => setAdminView("products")}
           >
             Products
           </button>
 
           <button
-            className={adminView === "add-product" ? "sidebar-link active" : "sidebar-link"}
+            className={
+              adminView === "add-product"
+                ? "sidebar-link active"
+                : "sidebar-link"
+            }
             onClick={() => setAdminView("add-product")}
           >
             Add Product
@@ -1136,24 +1278,144 @@ function App() {
   return (
     <div className="app">
       <div className="navbar">
-        <h2 className="logo" onClick={handleHiddenAdminEntry}>
-          ELORIA 💄
-        </h2>
+       <div className="logo" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
+<img src={eloriaLogo} alt="ELORIA Logo" />
+</div>
 
         <div className="navbar-actions">
+          <div className="favorites-icon" onClick={() => setShowFavorites(true)}>
+            ❤️ {favorites.length}
+          </div>
+
           <div className="cart-icon" onClick={() => setShowCart(true)}>
             🛒 {totalItems}
           </div>
         </div>
       </div>
 
-      <div className="hero-section">
-        <p className="subtitle">Glow in your own way ✨</p>
-        <p className="hero-description">
-          Discover your beauty favorites at ELORIA — curated makeup products
-          with a soft, elegant touch.
-        </p>
+      <div className="hero-video-section">
+        <video className="hero-video" autoPlay muted loop playsInline>
+          <source src={heroVideo} type="video/mp4" />
+        </video>
+
+        <div className="hero-overlay"></div>
+
+        <div className="hero-content">
+          <p className="hero-badge">ELORIA BEAUTY</p>
+          <h1>Soft beauty, bold confidence ✨</h1>
+          <p className="hero-description">
+            Discover curated beauty favorites designed to make every look feel
+            elegant, modern, and uniquely yours.
+          </p>
+
+          <button className="hero-shop-btn" onClick={scrollToProducts}>
+            Shop Now
+          </button>
+        </div>
       </div>
+
+      <section className="who-we-are-section">
+        <div className="who-we-are-container">
+          <div className="who-we-are-text">
+            <p className="section-tag">WHO WE ARE</p>
+            <h2>Two best friends, one soft dream — ELORIA</h2>
+            <p className="who-we-are-description">
+              ELORIA began in 2026 with two best friends, Ayman and Arwad, who
+              wanted to turn their friendship into something beautiful and
+              meaningful. What started with shared ideas, love for beauty, and
+              soft feminine details slowly became a little dream we decided to
+              build together.
+            </p>
+            <p className="who-we-are-description">
+              For us, ELORIA is more than a beauty store. It is a space full of
+              glow, warmth, confidence, and lovely little details. Every product
+              we choose carries a piece of our style, our friendship, and the
+              feeling we want every girl to experience while shopping with us.
+            </p>
+          </div>
+
+          <div className="who-we-are-logo-box">
+            <img src={eloriaLogo} alt="ELORIA logo" className="who-we-are-logo" />
+            <p className="who-we-are-year">Founded in 2026</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="instagram-section">
+        <div className="instagram-box">
+          <p className="section-tag">CONNECT WITH US</p>
+          <h2>Follow our glow on Instagram</h2>
+          <p>
+            Stay close to ELORIA for updates, new arrivals, soft beauty vibes,
+            and all the little lovely details we share with our community.
+          </p>
+
+          <a
+            href="https://instagram.com/theeloriaglow"
+            target="_blank"
+            rel="noreferrer"
+            className="instagram-link-btn"
+          >
+            @theeloriaglow
+          </a>
+        </div>
+      </section>
+
+      <section
+        className="featured-products-section"
+        id="featured-products-section"
+      >
+        <div className="featured-products-header">
+          <p className="section-tag">FEATURED PICKS</p>
+          <h2>A little taste of ELORIA</h2>
+          <p>
+            A small random selection of products to discover first before
+            exploring the full collection.
+          </p>
+        </div>
+
+        <div className="featured-products-grid two-featured-grid">
+          {featuredProducts.map((product) => renderStoreProductCard(product))}
+        </div>
+      </section>
+
+      <section className="shop-categories-section">
+        <div className="shop-categories-header">
+          <p className="section-tag">SHOP BY CATEGORY</p>
+          <h2>Find your favorites your way</h2>
+          <p>
+            Browse the collection by category and explore only the products you
+            are looking for.
+          </p>
+        </div>
+
+        <div className="shop-categories-grid">
+          <button className="category-card" onClick={() => handleCategorySelect("1")}>
+            <span>💄</span>
+            <h4>Lip Liner</h4>
+          </button>
+
+          <button className="category-card" onClick={() => handleCategorySelect("2")}>
+            <span>👁️</span>
+            <h4>Eyeliner</h4>
+          </button>
+
+          <button className="category-card" onClick={() => handleCategorySelect("3")}>
+            <span>✨</span>
+            <h4>Mascara</h4>
+          </button>
+
+          <button className="category-card" onClick={() => handleCategorySelect("6")}>
+            <span>🌷</span>
+            <h4>Blush</h4>
+          </button>
+
+          <button className="category-card" onClick={() => handleCategorySelect("7")}>
+            <span>💋</span>
+            <h4>Lips</h4>
+          </button>
+        </div>
+      </section>
 
       <div className="search-box">
         <input
@@ -1164,49 +1426,7 @@ function App() {
         />
       </div>
 
-      <div className="category-filter">
-        <button
-          className={selectedCategory === "all" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("all")}
-        >
-          All
-        </button>
-
-        <button
-          className={selectedCategory === "1" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("1")}
-        >
-          Lip Liner
-        </button>
-
-        <button
-          className={selectedCategory === "2" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("2")}
-        >
-          Eyeliner
-        </button>
-
-        <button
-          className={selectedCategory === "3" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("3")}
-        >
-          Mascara
-        </button>
-
-        <button
-          className={selectedCategory === "6" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("6")}
-        >
-          Blush
-        </button>
-
-        <button
-          className={selectedCategory === "7" ? "active-filter" : ""}
-          onClick={() => setSelectedCategory("7")}
-        >
-          Lips
-        </button>
-      </div>
+      
 
       <div className="sort-box">
         <select
@@ -1225,56 +1445,88 @@ function App() {
         </button>
       </div>
 
-      <p className="products-count">
-        Showing {filteredProducts.length} products
-      </p>
+      <div id="products-section">
+       <p className="products-count">
+  {selectedCategory === "all"
+    ? "Choose a category to view products"
+    : `Showing ${filteredProducts.length} products`}
+</p>
+      </div>
 
       <div className="products-container">
-        {loading ? (
-          <div className="loader"></div>
-        ) : filteredProducts.length > 0 ? (
-          filteredProducts.map((product) => (
-            <div
-              key={product.id}
-              className="product-card"
-              onClick={() => {
-                setSelectedProduct(product);
-                setSelectedImage(
-                  product.image_url ||
-                    product.image_url_2 ||
-                    product.image_url_3 ||
-                    defaultProductImage
-                );
-              }}
-            >
-              <img
-                src={product.image_url || defaultProductImage}
-                alt={product.name}
-                className="product-image"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = defaultProductImage;
-                }}
-              />
-              <h3>{product.name}</h3>
-              <p>💰 {product.price} ₪</p>
-              <p>📦 Stock: {product.stock}</p>
+        {selectedCategory === "all" ? (
+  <p className="no-products-message">
+    Choose a category above to start shopping 💕
+  </p>
+) : loading ? (
+  <div className="loader"></div>
+) : filteredProducts.length > 0 ? (
+  filteredProducts.map((product) => renderStoreProductCard(product))
+) : (
+  <p className="no-products-message">No products found 💔</p>
+)}
+      </div>
 
+      {showFavorites && (
+        <div className="favorites-overlay" onClick={() => setShowFavorites(false)}>
+          <div className="favorites-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="favorites-popup-header">
+              <h2>My Favorites ❤️</h2>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  addToCart(product);
-                }}
-                disabled={product.stock === 0}
+                className="close-cart-btn"
+                onClick={() => setShowFavorites(false)}
               >
-                {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                ✕
               </button>
             </div>
-          ))
-        ) : (
-          <p className="no-products-message">No products found 💔</p>
-        )}
-      </div>
+
+            {favorites.length === 0 ? (
+              <div className="favorites-empty">
+                <h3>No favorites yet</h3>
+                <p>Save the products you love and come back to them anytime.</p>
+              </div>
+            ) : (
+              <div className="favorites-grid">
+                {favorites.map((item) => (
+                  <div key={item.id} className="favorite-product-card">
+                    <img
+                      src={item.image_url || defaultProductImage}
+                      alt={item.name}
+                      className="favorite-product-image"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultProductImage;
+                      }}
+                    />
+
+                    <h4>{item.name}</h4>
+                    <p className="favorite-price">{item.price} ₪</p>
+
+                    <div className="favorite-actions">
+                      <button
+                        className="confirm-btn"
+                        onClick={() => {
+                          addToCart(item);
+                          setShowFavorites(false);
+                        }}
+                      >
+                        Add to Cart
+                      </button>
+
+                      <button
+                        className="cart-remove-btn"
+                        onClick={() => toggleFavorite(item)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showCart && (
         <div className="cart-overlay" onClick={() => setShowCart(false)}>
@@ -1348,7 +1600,10 @@ function App() {
       )}
 
       {showCheckout && (
-        <div className="checkout-overlay" onClick={() => setShowCheckout(false)}>
+        <div
+          className="checkout-overlay"
+          onClick={() => setShowCheckout(false)}
+        >
           <div className="checkout-popup" onClick={(e) => e.stopPropagation()}>
             <div className="checkout-popup-header">
               <h2>Customer Information</h2>
@@ -1411,17 +1666,21 @@ function App() {
           className="product-modal-overlay"
           onClick={() => setSelectedProduct(null)}
         >
-          <div
-            className="product-modal"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="product-modal" onClick={(e) => e.stopPropagation()}>
             <button
               className="close-product-btn"
               onClick={() => setSelectedProduct(null)}
             >
               ✕
             </button>
-
+<button
+  className={`modal-favorite-btn ${
+    isFavorite(selectedProduct.id) ? "active-favorite" : ""
+  }`}
+  onClick={() => toggleFavorite(selectedProduct)}
+>
+  {isFavorite(selectedProduct.id) ? "❤" : "♡"}
+</button>
             <img
               src={selectedImage}
               alt={selectedProduct.name}
@@ -1466,15 +1725,16 @@ function App() {
               A beautiful ELORIA pick designed to add a soft, elegant touch to
               your makeup collection.
             </p>
-            <p><strong>Price:</strong> {selectedProduct.price} ₪</p>
-            <p><strong>Stock:</strong> {selectedProduct.stock}</p>
+            <p>
+              <strong>Price:</strong> {selectedProduct.price} ₪
+            </p>
 
             <span
               className={`stock-badge ${
                 selectedProduct.stock === 0 ? "out-stock" : "in-stock"
               }`}
             >
-              {selectedProduct.stock === 0 ? "Out of Stock" : "In Stock"}
+              {selectedProduct.stock === 0 ? "Out of Stock" : "Available"}
             </span>
 
             <div style={{ marginTop: "16px" }}>
