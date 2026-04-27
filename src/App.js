@@ -357,52 +357,55 @@ function App() {
   };
 
   const handleUpdateProduct = async () => {
-    if (
-      !editingProduct?.name ||
-      !editingProduct?.price ||
-      !editingProduct?.stock
-    ) {
-      showToastMessage("Please fill all required edit fields.", "error");
-      return;
-    }
+  if (!editingProduct?.name || !editingProduct?.price || !editingProduct?.stock) {
+    showToastMessage("Please fill all required edit fields.", "error");
+    return;
+  }
 
+  try {
+    const formData = new FormData();
+
+    formData.append("name", editingProduct.name);
+    formData.append("price", editingProduct.price);
+    formData.append("stock", editingProduct.stock);
+    formData.append("category_id", editingProduct.category_id);
+
+    formData.append("image_url", editingProduct.image_url || "");
+    formData.append("image_url_2", editingProduct.image_url_2 || "");
+    formData.append("image_url_3", editingProduct.image_url_3 || "");
+
+    if (editProductImage) formData.append("image", editProductImage);
+    if (editProductImage2) formData.append("image2", editProductImage2);
+    if (editProductImage3) formData.append("image3", editProductImage3);
+
+    const response = await fetch(`${API_URL}/products/${editingProduct.id}`, {
+      method: "PUT",
+      body: formData
+    });
+
+    const text = await response.text();
+
+    let data;
     try {
-      const formData = new FormData();
-      formData.append("name", editingProduct.name);
-      formData.append("price", editingProduct.price);
-      formData.append("stock", editingProduct.stock);
-      formData.append("category_id", editingProduct.category_id);
-      formData.append("image_url", editingProduct.image_url || "");
-      formData.append("image_url_2", editingProduct.image_url_2 || "");
-      formData.append("image_url_3", editingProduct.image_url_3 || "");
-
-      if (editProductImage) formData.append("image", editProductImage);
-      if (editProductImage2) formData.append("image2", editProductImage2);
-      if (editProductImage3) formData.append("image3", editProductImage3);
-
-      const response = await fetch(`${API_URL}/products/${editingProduct.id}`, {
-        method: "PUT",
-        body: formData
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showToastMessage("Product updated ✨", "success");
-        setEditingProduct(null);
-        setEditProductImage(null);
-        setEditProductImage2(null);
-        setEditProductImage3(null);
-        setShowEditPopup(false);
-        fetchProducts();
-      } else {
-        showToastMessage(data.error || "Failed to update product", "error");
-      }
-    } catch (err) {
-      console.log(err);
-      showToastMessage("Error updating product", "error");
+      data = JSON.parse(text);
+    } catch {
+      data = { error: text };
     }
-  };
+
+    if (response.ok) {
+      showToastMessage("Product updated ✨", "success");
+      setShowEditPopup(false);
+      setEditingProduct(null);
+      fetchProducts();
+    } else {
+      console.log("Update error details:", data);
+      showToastMessage(data.details || data.error || "Update failed ❌", "error");
+    }
+  } catch (err) {
+    console.log(err);
+    showToastMessage("Error updating product ❌", "error");
+  }
+};
 
   const deleteProduct = async (productId) => {
     const confirmDelete = window.confirm(
@@ -449,9 +452,9 @@ function App() {
     try {
       const response = await fetch(`${API_URL}/orders`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+         headers: {
+    "Content-Type": "application/json"
+  },
         body: JSON.stringify({
           customerInfo,
           cart,
@@ -492,8 +495,8 @@ function App() {
       const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
         method: "PUT",
         headers: {
-          "Content-Type": "application/json"
-        },
+    "Content-Type": "application/json"
+  },
         body: JSON.stringify({
           status: newStatus
         })
@@ -578,12 +581,12 @@ function App() {
     return favorites.some((item) => item.id === productId);
   };
 
-  const scrollToProducts = () => {
-    const featuredSection = document.getElementById("featured-products-section");
-    if (featuredSection) {
-      featuredSection.scrollIntoView({ behavior: "smooth" });
-    }
-  };
+  const handleShopNow = () => {
+  const section = document.getElementById("categories-section");
+  if (section) {
+    section.scrollIntoView({ behavior: "smooth" });
+  }
+};
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategory(categoryId);
@@ -1278,8 +1281,8 @@ function App() {
   return (
     <div className="app">
       <div className="navbar">
-       <div className="logo" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>
-<img src={eloriaLogo} alt="ELORIA Logo" />
+       <div className="logo" onClick={handleHiddenAdminEntry}>
+  <img src={eloriaLogo} alt="ELORIA Logo" />
 </div>
 
         <div className="navbar-actions">
@@ -1307,10 +1310,9 @@ function App() {
             Discover curated beauty favorites designed to make every look feel
             elegant, modern, and uniquely yours.
           </p>
-
-          <button className="hero-shop-btn" onClick={scrollToProducts}>
-            Shop Now
-          </button>
+<button className="hero-shop-btn" onClick={handleShopNow}>
+  Shop Now
+</button>
         </div>
       </div>
 
@@ -1379,8 +1381,8 @@ function App() {
         </div>
       </section>
 
-      <section className="shop-categories-section">
-        <div className="shop-categories-header">
+<section id="categories-section" className="shop-categories-section">
+          <div className="shop-categories-header">
           <p className="section-tag">SHOP BY CATEGORY</p>
           <h2>Find your favorites your way</h2>
           <p>

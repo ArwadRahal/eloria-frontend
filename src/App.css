@@ -2679,3 +2679,27 @@ body {
     height: 135px !important;
   }
 }
+
+html {
+  scroll-behavior: smooth;
+}
+
+.who-we-are-section,
+.instagram-section,
+.featured-products-section,
+.shop-categories-section,
+.products-container {
+  animation: softFadeUp 0.7s ease both;
+}
+
+@keyframes softFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
