@@ -43,7 +43,120 @@ function App() {
 
   const [favorites, setFavorites] = useState([]);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [page, setPage] = useState("home");
+const [language, setLanguage] = useState("en");
 
+const isArabic = language === "ar";
+const [previewImages, setPreviewImages] = useState({
+  image: null,
+  image2: null,
+  image3: null
+});
+
+const handleImagePreview = (e, field) => {
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const previewURL = URL.createObjectURL(file);
+
+  setPreviewImages((prev) => ({
+    ...prev,
+    [field]: previewURL
+  }));
+
+  if (field === "image") setNewProductImage(file);
+  if (field === "image2") setNewProductImage2(file);
+  if (field === "image3") setNewProductImage3(file);
+};
+const t = {
+  en: {
+    heroBadge: "ELORIA BEAUTY",
+    heroTitle: "Soft beauty, bold confidence ✨",
+    heroDescription:
+      "Discover curated beauty favorites designed to make every look feel elegant, modern, and uniquely yours.",
+    shopNow: "Shop Now",
+    whoTag: "WHO WE ARE",
+    whoTitle: "Two best friends, one soft dream — ELORIA",
+    whoP1:
+      "ELORIA began in 2026 with two best friends, Ayman and Arwad, who wanted to turn their friendship into something beautiful and meaningful.",
+    whoP2:
+      "For us, ELORIA is more than a beauty store. It is a space full of glow, warmth, confidence, and lovely little details.",
+    founded: "Founded in 2026",
+    connectTag: "CONNECT WITH US",
+    instagramTitle: "Follow our glow on Instagram",
+    instagramText:
+      "Stay close to ELORIA for updates, new arrivals, soft beauty vibes, and all the little lovely details we share with our community.",
+    featuredTag: "FEATURED PICKS",
+    featuredTitle: "A little taste of ELORIA",
+    featuredText:
+      "A small random selection of products to discover first before exploring the full collection.",
+    categoryTag: "SHOP BY CATEGORY",
+    categoryTitle: "Find your favorites your way",
+    categoryText:
+      "Browse the collection by category and explore only the products you are looking for.",
+    searchPlaceholder: "Search products...",
+    sortDefault: "Sort by",
+    lowToHigh: "Price: Low to High",
+    highToLow: "Price: High to Low",
+    clearFilters: "Clear Filters",
+    chooseCategory: "Choose a category to view products",
+    chooseStart: "Choose a category above to start shopping 💕",
+    noProducts: "No products found 💔",
+    addToCart: "Add to Cart",
+    outOfStock: "Out of Stock",
+    available: "Available",
+    favorites: "My Favorites ❤️",
+    cart: "Shopping Cart 🛒",
+    checkout: "Customer Information",
+    finalTitle: "Thank you for visiting ELORIA 💕",
+    finalText: "We hope you find your next beauty favorite with us.",
+    footer: "ELORIA © 2026 — Beauty with a soft elegant touch ✨"
+  },
+  ar: {
+    heroBadge: "إلوريا بيوتي",
+    heroTitle: "جمالك الناعم… وثقتك الأقوى ✨",
+    heroDescription:
+      "اكتشفي منتجات مختارة بعناية لتضيف لمستك الأنثوية الناعمة لكل إطلالة.",
+    shopNow: "تسوّقي الآن",
+    whoTag: "من نحن",
+    whoTitle: "صديقتان وحلم جميل اسمه ELORIA",
+    whoP1:
+      "بدأت ELORIA في عام 2026 على يد صديقتين، أيمان وأرواد، قررتا تحويل الصداقة والحب للجمال إلى مشروع يحمل روحًا ناعمة ومميزة.",
+    whoP2:
+      "بالنسبة لنا، ELORIA ليست مجرد متجر. هي مساحة مليئة بالدفء، الثقة، اللمعان، والتفاصيل الصغيرة التي تجعل تجربة التسوق ألطف.",
+    founded: "تأسست عام 2026",
+    connectTag: "تواصلي معنا",
+    instagramTitle: "تابعي لمعتنا على إنستغرام",
+    instagramText:
+      "كوني قريبة من ELORIA لتشاهدي المنتجات الجديدة، التحديثات، والأجواء الناعمة التي نشاركها مع مجتمعنا.",
+    featuredTag: "اختيارات مميزة",
+    featuredTitle: "لمحة صغيرة من ELORIA",
+    featuredText:
+      "اختيار عشوائي صغير من منتجاتنا قبل استكشاف المجموعة كاملة.",
+    categoryTag: "تسوقي حسب الفئة",
+    categoryTitle: "اختاري منتجاتك بطريقتك",
+    categoryText:
+      "تصفحي المنتجات حسب النوع واختاري فقط الفئة التي تبحثين عنها.",
+    searchPlaceholder: "ابحثي عن منتج...",
+    sortDefault: "ترتيب حسب",
+    lowToHigh: "السعر: من الأقل للأعلى",
+    highToLow: "السعر: من الأعلى للأقل",
+    clearFilters: "مسح الفلاتر",
+    chooseCategory: "اختاري فئة لعرض المنتجات",
+    chooseStart: "اختاري فئة من الأعلى لتبدأي التسوق 💕",
+    noProducts: "لا توجد منتجات 💔",
+    addToCart: "أضيفي للسلة",
+    outOfStock: "نفدت الكمية",
+    available: "متوفر",
+    favorites: "المفضلة ❤️",
+    cart: "سلة التسوق 🛒",
+    checkout: "معلومات الزبونة",
+    finalTitle: "شكرًا لزيارتك ELORIA 💕",
+    finalText: "نتمنى أن تجدي معنا منتجك المفضل القادم.",
+    footer: "ELORIA © 2026 — جمال ناعم بلمسة أنيقة ✨"
+  }
+};
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -303,6 +416,11 @@ function App() {
     setEditProductImage(null);
     setEditProductImage2(null);
     setEditProductImage3(null);
+    setPreviewImages({
+  image: null,
+  image2: null,
+  image3: null
+});
     setShowEditPopup(true);
   };
 
@@ -346,6 +464,12 @@ function App() {
         setNewProductImage(null);
         setNewProductImage2(null);
         setNewProductImage3(null);
+setPreviewImages({
+  image: null,
+  image2: null,
+  image3: null
+});
+
         fetchProducts();
       } else {
         showToastMessage(data.error || "Failed to add product.", "error");
@@ -582,21 +706,26 @@ function App() {
   };
 
   const handleShopNow = () => {
-  const section = document.getElementById("categories-section");
-  if (section) {
-    section.scrollIntoView({ behavior: "smooth" });
-  }
-};
+    setSelectedCategory("all");
+    setSearchTerm("");
+    setSortOrder("default");
+    setPage("shop");
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }, 50);
+  };
 
   const handleCategorySelect = (categoryId) => {
     setSelectedCategory(categoryId);
-
-    const productsSection = document.getElementById("products-section");
-    if (productsSection) {
-      setTimeout(() => {
-        productsSection.scrollIntoView({ behavior: "smooth" });
-      }, 100);
-    }
+    setPage("shop");
+    setTimeout(() => {
+      const productsSection = document.getElementById("products-section");
+      if (productsSection) {
+        productsSection.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+    }, 80);
   };
 
   const totalPrice = cart.reduce(
@@ -644,9 +773,14 @@ function App() {
       return 0;
     });
 
-  const featuredProducts = useMemo(() => {
-    const shuffled = [...products].sort(() => Math.random() - 0.5);
-    return shuffled.slice(0, 2);
+  const latestProducts = useMemo(() => products.slice(0, 4), [products]);
+  const softBeautyPicks = useMemo(() => {
+    const picks = products.slice(4, 8);
+    return picks.length > 0 ? picks : products.slice(0, 4);
+  }, [products]);
+  const finalHomeProducts = useMemo(() => {
+    const picks = products.slice(8, 12);
+    return picks.length > 0 ? picks : products.slice(0, 4);
   }, [products]);
 
   const filteredAdminProducts = products.filter((product) => {
@@ -988,71 +1122,80 @@ function App() {
     );
   };
 
-  const renderAddProduct = () => {
-    return (
-      <div className="add-product-form admin-form-page">
-        <h3>Add New Product</h3>
+ const renderAddProduct = () => {
+  return (
+    <div className="add-product-form admin-form-page">
+      <h3>Add New Product</h3>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Product Name"
-          value={newProduct.name}
-          onChange={handleNewProductChange}
-        />
+      <input
+        type="text"
+        name="name"
+        placeholder="Product Name"
+        value={newProduct.name}
+        onChange={handleNewProductChange}
+      />
 
-        <input
-          type="number"
-          name="price"
-          placeholder="Price"
-          value={newProduct.price}
-          onChange={handleNewProductChange}
-        />
+      <input
+        type="number"
+        name="price"
+        placeholder="Price"
+        value={newProduct.price}
+        onChange={handleNewProductChange}
+      />
 
-        <input
-          type="number"
-          name="stock"
-          placeholder="Stock"
-          value={newProduct.stock}
-          onChange={handleNewProductChange}
-        />
+      <input
+        type="number"
+        name="stock"
+        placeholder="Stock"
+        value={newProduct.stock}
+        onChange={handleNewProductChange}
+      />
 
-        <select
-          name="category_id"
-          value={newProduct.category_id}
-          onChange={handleNewProductChange}
-        >
-          <option value="1">Lip Liner</option>
-          <option value="2">Eyeliner</option>
-          <option value="3">Mascara</option>
-          <option value="6">Blush</option>
-          <option value="7">Lips</option>
-        </select>
+      <select
+        name="category_id"
+        value={newProduct.category_id}
+        onChange={handleNewProductChange}
+      >
+        <option value="1">Lip Liner</option>
+        <option value="2">Eyeliner</option>
+        <option value="3">Mascara</option>
+        <option value="6">Blush</option>
+        <option value="7">Lips</option>
+      </select>
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setNewProductImage(e.target.files[0])}
-        />
+      <label>Main Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => handleImagePreview(e, "image")}
+      />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setNewProductImage2(e.target.files[0])}
-        />
+      <label>Second Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => handleImagePreview(e, "image2")}
+      />
 
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => setNewProductImage3(e.target.files[0])}
-        />
+      <label>Third Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => handleImagePreview(e, "image3")}
+      />
 
-        <button className="submit-order-btn" onClick={handleAddProduct}>
-          Save Product
-        </button>
+      <div className="preview-images">
+        {previewImages.image && <img src={previewImages.image} alt="preview 1" />}
+        {previewImages.image2 && <img src={previewImages.image2} alt="preview 2" />}
+        {previewImages.image3 && <img src={previewImages.image3} alt="preview 3" />}
       </div>
-    );
-  };
+
+      <button className="submit-order-btn" onClick={handleAddProduct}>
+        Save Product
+      </button>
+    </div>
+  );
+};
 
   const renderStoreProductCard = (product) => (
     <div
@@ -1066,6 +1209,10 @@ function App() {
             product.image_url_3 ||
             defaultProductImage
         );
+        setPage("product");
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }, 50);
       }}
     >
       <button
@@ -1097,7 +1244,7 @@ function App() {
         <p className="product-price">{product.price} ₪</p>
 
         {product.stock === 0 && (
-          <span className="product-out-badge">Out of Stock</span>
+      <span className="product-out-badge">{t[language].outOfStock}</span>
         )}
 
         <button
@@ -1108,11 +1255,166 @@ function App() {
           }}
           disabled={product.stock === 0}
         >
-          {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+       {product.stock === 0 ? t[language].outOfStock : t[language].addToCart}
         </button>
       </div>
     </div>
   );
+
+
+  const renderProductDetails = () => {
+    if (!selectedProduct) return null;
+
+    const productImages = [
+      selectedProduct.image_url,
+      selectedProduct.image_url_2,
+      selectedProduct.image_url_3
+    ].filter(Boolean);
+
+    const galleryImages =
+      productImages.length > 0 ? productImages : [defaultProductImage];
+
+    const relatedProducts = products
+      .filter(
+        (product) =>
+          product.id !== selectedProduct.id &&
+          String(product.category_id) === String(selectedProduct.category_id)
+      )
+      .slice(0, 4);
+
+    const fallbackRelatedProducts = products
+      .filter((product) => product.id !== selectedProduct.id)
+      .slice(0, 4);
+
+    const productsToShow =
+      relatedProducts.length > 0 ? relatedProducts : fallbackRelatedProducts;
+
+    return (
+      <main className="product-details-page">
+        <button
+          className="continue-shopping-btn"
+          onClick={() => {
+            setPage("shop");
+            setSelectedProduct(null);
+            setTimeout(() => {
+              window.scrollTo({ top: 0, behavior: "smooth" });
+            }, 50);
+          }}
+        >
+          ← Continue Shopping
+        </button>
+
+        <section className="product-details-layout">
+          <div className="product-details-gallery">
+            <div className="product-details-main-image-box">
+              <img
+                src={selectedImage || galleryImages[0]}
+                alt={selectedProduct.name}
+                className="product-details-main-image"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = defaultProductImage;
+                }}
+              />
+            </div>
+
+            <div className="product-details-thumbnails">
+              {galleryImages.map((image, index) => (
+                <button
+                  key={index}
+                  className={`product-details-thumb-btn ${
+                    selectedImage === image ? "active-detail-thumb" : ""
+                  }`}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <img
+                    src={image}
+                    alt={`${selectedProduct.name} ${index + 1}`}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = defaultProductImage;
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="product-details-info">
+            <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
+            <h1>{selectedProduct.name}</h1>
+
+            <p className="product-details-shade">
+              Shade / Variant details are included in the product name.
+            </p>
+
+            <p className="product-details-description">
+              A beautiful ELORIA pick designed to add a soft, elegant touch to
+              your makeup collection. Browse the gallery, check availability,
+              and add it to your bag when you are ready.
+            </p>
+
+            <div className="product-details-price-row">
+              <span className="product-details-price">{selectedProduct.price} ₪</span>
+              <span
+                className={`stock-badge ${
+                  selectedProduct.stock === 0 ? "out-stock" : "in-stock"
+                }`}
+              >
+                {selectedProduct.stock === 0
+                  ? t[language].outOfStock
+                  : t[language].available}
+              </span>
+            </div>
+
+            <div className="product-details-actions">
+              <button
+                className="details-add-cart-btn"
+                onClick={() => addToCart(selectedProduct)}
+                disabled={selectedProduct.stock === 0}
+              >
+                {selectedProduct.stock === 0
+                  ? t[language].outOfStock
+                  : t[language].addToCart}
+              </button>
+
+              <button
+                className={`details-favorite-btn ${
+                  isFavorite(selectedProduct.id) ? "active-favorite" : ""
+                }`}
+                onClick={() => toggleFavorite(selectedProduct)}
+              >
+                {isFavorite(selectedProduct.id) ? "❤ Saved" : "♡ Save"}
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="related-products-section">
+          <div className="home-strip-header">
+            <p className="section-tag">RELATED PRODUCTS</p>
+            <h2>You may also like</h2>
+            <button
+              className="view-all-btn"
+              onClick={() => {
+                setPage("shop");
+                setTimeout(() => {
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }, 50);
+              }}
+            >
+              View all products
+            </button>
+          </div>
+
+          <div className="home-products-row">
+            {productsToShow.map((product) => renderStoreProductCard(product))}
+          </div>
+        </section>
+      </main>
+    );
+  };
+
 
   if (isAdmin) {
     return (
@@ -1180,94 +1482,157 @@ function App() {
         </main>
 
         {showEditPopup && editingProduct && (
-          <div
-            className="edit-popup-overlay"
-            onClick={() => setShowEditPopup(false)}
-          >
-            <div
-              className="edit-popup-box"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                className="close-product-btn"
-                onClick={() => setShowEditPopup(false)}
-              >
-                ✕
-              </button>
+  <div
+    className="edit-popup-overlay"
+    onClick={() => setShowEditPopup(false)}
+  >
+    <div className="edit-popup-box" onClick={(e) => e.stopPropagation()}>
+      <button
+        className="close-product-btn"
+        onClick={() => setShowEditPopup(false)}
+      >
+        ✕
+      </button>
 
-              <h3>Edit Product</h3>
+      <h3>Edit Product</h3>
 
-              <input
-                name="name"
-                placeholder="Product Name"
-                value={editingProduct.name}
-                onChange={handleEditChange}
-              />
+      <label>Product Name</label>
+      <input
+        name="name"
+        placeholder="Product Name"
+        value={editingProduct.name}
+        onChange={handleEditChange}
+      />
 
-              <input
-                name="price"
-                type="number"
-                placeholder="Price"
-                value={editingProduct.price}
-                onChange={handleEditChange}
-              />
+      <label>Price</label>
+      <input
+        name="price"
+        type="number"
+        placeholder="Price"
+        value={editingProduct.price}
+        onChange={handleEditChange}
+      />
 
-              <input
-                name="stock"
-                type="number"
-                placeholder="Stock"
-                value={editingProduct.stock}
-                onChange={handleEditChange}
-              />
+      <label>Stock</label>
+      <input
+        name="stock"
+        type="number"
+        placeholder="Stock"
+        value={editingProduct.stock}
+        onChange={handleEditChange}
+      />
 
-              <select
-                name="category_id"
-                value={editingProduct.category_id}
-                onChange={handleEditChange}
-              >
-                <option value="1">Lip Liner</option>
-                <option value="2">Eyeliner</option>
-                <option value="3">Mascara</option>
-                <option value="6">Blush</option>
-                <option value="7">Lips</option>
-              </select>
+      <label>Category</label>
+      <select
+        name="category_id"
+        value={editingProduct.category_id}
+        onChange={handleEditChange}
+      >
+        <option value="1">Lip Liner</option>
+        <option value="2">Eyeliner</option>
+        <option value="3">Mascara</option>
+        <option value="6">Blush</option>
+        <option value="7">Lips</option>
+      </select>
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setEditProductImage(e.target.files[0])}
-              />
+      <label>Main Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (!file) return;
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setEditProductImage2(e.target.files[0])}
-              />
+          setEditProductImage(file);
+          setPreviewImages((prev) => ({
+            ...prev,
+            image: URL.createObjectURL(file)
+          }));
+        }}
+      />
 
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setEditProductImage3(e.target.files[0])}
-              />
+      <label>Second Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (!file) return;
 
-              <div className="edit-product-actions">
-                <button
-                  onClick={handleUpdateProduct}
-                  className="submit-order-btn"
-                >
-                  Save Changes
-                </button>
+          setEditProductImage2(file);
+          setPreviewImages((prev) => ({
+            ...prev,
+            image2: URL.createObjectURL(file)
+          }));
+        }}
+      />
 
-                <button
-                  onClick={() => setShowEditPopup(false)}
-                  className="delete-product-btn"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+      <label>Third Image</label>
+      <input
+        type="file"
+        accept="image/*"
+        onChange={(e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+
+          setEditProductImage3(file);
+          setPreviewImages((prev) => ({
+            ...prev,
+            image3: URL.createObjectURL(file)
+          }));
+        }}
+      />
+
+      <div className="preview-images">
+        {(previewImages.image || editingProduct.image_url) && (
+          <img
+            src={previewImages.image || editingProduct.image_url}
+            alt="preview 1"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultProductImage;
+            }}
+          />
         )}
+
+        {(previewImages.image2 || editingProduct.image_url_2) && (
+          <img
+            src={previewImages.image2 || editingProduct.image_url_2}
+            alt="preview 2"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultProductImage;
+            }}
+          />
+        )}
+
+        {(previewImages.image3 || editingProduct.image_url_3) && (
+          <img
+            src={previewImages.image3 || editingProduct.image_url_3}
+            alt="preview 3"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultProductImage;
+            }}
+          />
+        )}
+      </div>
+
+      <div className="edit-product-actions">
+        <button onClick={handleUpdateProduct} className="submit-order-btn">
+          Save Changes
+        </button>
+
+        <button
+          onClick={() => setShowEditPopup(false)}
+          className="delete-product-btn"
+        >
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+)}
 
         {toast.show && (
           <div className={`toast-message toast-${toast.type}`}>
@@ -1279,201 +1644,209 @@ function App() {
   }
 
   return (
-    <div className="app">
-      <div className="navbar">
-       <div className="logo" onClick={handleHiddenAdminEntry}>
-  <img src={eloriaLogo} alt="ELORIA Logo" />
-</div>
-
-        <div className="navbar-actions">
-          <div className="favorites-icon" onClick={() => setShowFavorites(true)}>
-            ❤️ {favorites.length}
-          </div>
-
-          <div className="cart-icon" onClick={() => setShowCart(true)}>
-            🛒 {totalItems}
-          </div>
-        </div>
-      </div>
-
-      <div className="hero-video-section">
-        <video className="hero-video" autoPlay muted loop playsInline>
-          <source src={heroVideo} type="video/mp4" />
-        </video>
-
-        <div className="hero-overlay"></div>
-
-        <div className="hero-content">
-          <p className="hero-badge">ELORIA BEAUTY</p>
-          <h1>Soft beauty, bold confidence ✨</h1>
-          <p className="hero-description">
-            Discover curated beauty favorites designed to make every look feel
-            elegant, modern, and uniquely yours.
-          </p>
-<button className="hero-shop-btn" onClick={handleShopNow}>
-  Shop Now
-</button>
-        </div>
-      </div>
-
-      <section className="who-we-are-section">
-        <div className="who-we-are-container">
-          <div className="who-we-are-text">
-            <p className="section-tag">WHO WE ARE</p>
-            <h2>Two best friends, one soft dream — ELORIA</h2>
-            <p className="who-we-are-description">
-              ELORIA began in 2026 with two best friends, Ayman and Arwad, who
-              wanted to turn their friendship into something beautiful and
-              meaningful. What started with shared ideas, love for beauty, and
-              soft feminine details slowly became a little dream we decided to
-              build together.
-            </p>
-            <p className="who-we-are-description">
-              For us, ELORIA is more than a beauty store. It is a space full of
-              glow, warmth, confidence, and lovely little details. Every product
-              we choose carries a piece of our style, our friendship, and the
-              feeling we want every girl to experience while shopping with us.
-            </p>
-          </div>
-
-          <div className="who-we-are-logo-box">
-            <img src={eloriaLogo} alt="ELORIA logo" className="who-we-are-logo" />
-            <p className="who-we-are-year">Founded in 2026</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="instagram-section">
-        <div className="instagram-box">
-          <p className="section-tag">CONNECT WITH US</p>
-          <h2>Follow our glow on Instagram</h2>
-          <p>
-            Stay close to ELORIA for updates, new arrivals, soft beauty vibes,
-            and all the little lovely details we share with our community.
-          </p>
-
-          <a
-            href="https://instagram.com/theeloriaglow"
-            target="_blank"
-            rel="noreferrer"
-            className="instagram-link-btn"
+    <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
+      <div className="luxury-navbar">
+        <div className="nav-left">
+          <div
+            className="logo luxury-logo"
+            onClick={() => {
+              setPage("home");
+              setSelectedCategory("all");
+              handleHiddenAdminEntry();
+            }}
           >
-            @theeloriaglow
-          </a>
-        </div>
-      </section>
-
-      <section
-        className="featured-products-section"
-        id="featured-products-section"
-      >
-        <div className="featured-products-header">
-          <p className="section-tag">FEATURED PICKS</p>
-          <h2>A little taste of ELORIA</h2>
-          <p>
-            A small random selection of products to discover first before
-            exploring the full collection.
-          </p>
+            <img src={eloriaLogo} alt="ELORIA Logo" />
+          </div>
         </div>
 
-        <div className="featured-products-grid two-featured-grid">
-          {featuredProducts.map((product) => renderStoreProductCard(product))}
-        </div>
-      </section>
-
-<section id="categories-section" className="shop-categories-section">
-          <div className="shop-categories-header">
-          <p className="section-tag">SHOP BY CATEGORY</p>
-          <h2>Find your favorites your way</h2>
-          <p>
-            Browse the collection by category and explore only the products you
-            are looking for.
-          </p>
+        <div className="nav-center">
+          <button onClick={() => handleCategorySelect("1")}>Lip Liner</button>
+          <button onClick={() => handleCategorySelect("2")}>Eyeliner</button>
+          <button onClick={() => handleCategorySelect("3")}>Mascara</button>
+          <button onClick={() => handleCategorySelect("6")}>Blush</button>
+          <button onClick={() => handleCategorySelect("7")}>Lips</button>
         </div>
 
-        <div className="shop-categories-grid">
-          <button className="category-card" onClick={() => handleCategorySelect("1")}>
-            <span>💄</span>
-            <h4>Lip Liner</h4>
+        <div className="nav-right">
+          <button className="nav-icon-btn" onClick={() => setShowFavorites(true)}>
+            ♡ {favorites.length}
           </button>
 
-          <button className="category-card" onClick={() => handleCategorySelect("2")}>
-            <span>👁️</span>
-            <h4>Eyeliner</h4>
+          <button className="nav-icon-btn" onClick={() => setShowCart(true)}>
+            Bag ({totalItems})
           </button>
 
-          <button className="category-card" onClick={() => handleCategorySelect("3")}>
-            <span>✨</span>
-            <h4>Mascara</h4>
-          </button>
-
-          <button className="category-card" onClick={() => handleCategorySelect("6")}>
-            <span>🌷</span>
-            <h4>Blush</h4>
-          </button>
-
-          <button className="category-card" onClick={() => handleCategorySelect("7")}>
-            <span>💋</span>
-            <h4>Lips</h4>
+          <button
+            className="language-toggle clean-language-btn"
+            onClick={() => setLanguage(isArabic ? "en" : "ar")}
+          >
+            {isArabic ? "EN" : "AR"}
           </button>
         </div>
-      </section>
-
-      <div className="search-box">
-        <input
-          type="text"
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
       </div>
 
-      
+      {page === "home" ? (
+        <>
+          <section className="hero-video-section">
+            <video className="hero-video" autoPlay muted loop playsInline>
+              <source src={heroVideo} type="video/mp4" />
+            </video>
 
-      <div className="sort-box">
-        <select
-          value={sortOrder}
-          onChange={(e) => setSortOrder(e.target.value)}
-        >
-          <option value="default">Sort by</option>
-          <option value="low-to-high">Price: Low to High</option>
-          <option value="high-to-low">Price: High to Low</option>
-        </select>
-      </div>
+            <div className="hero-overlay"></div>
 
-      <div className="clear-filters-box">
-        <button className="clear-filters-btn" onClick={clearFilters}>
-          Clear Filters
-        </button>
-      </div>
+            <div className="hero-content">
+              <p className="hero-badge">{t[language].heroBadge}</p>
+              <h1>{t[language].heroTitle}</h1>
+              <p className="hero-description">{t[language].heroDescription}</p>
 
-      <div id="products-section">
-       <p className="products-count">
-  {selectedCategory === "all"
-    ? "Choose a category to view products"
-    : `Showing ${filteredProducts.length} products`}
-</p>
-      </div>
+              <button className="hero-shop-btn" onClick={handleShopNow}>
+                {t[language].shopNow}
+              </button>
+            </div>
+          </section>
 
-      <div className="products-container">
-        {selectedCategory === "all" ? (
-  <p className="no-products-message">
-    Choose a category above to start shopping 💕
-  </p>
-) : loading ? (
-  <div className="loader"></div>
-) : filteredProducts.length > 0 ? (
-  filteredProducts.map((product) => renderStoreProductCard(product))
-) : (
-  <p className="no-products-message">No products found 💔</p>
-)}
-      </div>
+          <section className="home-product-strip">
+            <div className="home-strip-header">
+              <p className="section-tag">NEW ARRIVALS</p>
+              <h2>Fresh beauty picks</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>View all products</button>
+            </div>
 
+            <div className="home-products-row">
+              {latestProducts.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <section className="who-we-are-section">
+            <div className="who-we-are-container">
+              <div className="who-we-are-text">
+                <p className="section-tag">{t[language].whoTag}</p>
+                <h2>{t[language].whoTitle}</h2>
+                <p className="who-we-are-description">{t[language].whoP1}</p>
+                <p className="who-we-are-description">{t[language].whoP2}</p>
+              </div>
+
+              <div className="who-we-are-logo-box">
+                <img src={eloriaLogo} alt="ELORIA logo" className="who-we-are-logo" />
+                <p className="who-we-are-year">{t[language].founded}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="home-product-strip home-product-strip-alt">
+            <div className="home-strip-header">
+              <p className="section-tag">SOFT BEAUTY PICKS</p>
+              <h2>Made for your everyday glow</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>Shop collection</button>
+            </div>
+
+            <div className="home-products-row">
+              {softBeautyPicks.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <section className="instagram-section">
+            <div className="instagram-box">
+              <p className="section-tag">{t[language].connectTag}</p>
+              <h2>{t[language].instagramTitle}</h2>
+              <p>{t[language].instagramText}</p>
+
+              <a
+                href="https://instagram.com/theeloriaglow"
+                target="_blank"
+                rel="noreferrer"
+                className="instagram-link-btn"
+              >
+                @theeloriaglow
+              </a>
+            </div>
+          </section>
+
+          <section className="home-product-strip">
+            <div className="home-strip-header">
+              <p className="section-tag">YOU MAY ALSO LOVE</p>
+              <h2>A few more ELORIA favorites</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>Continue shopping</button>
+            </div>
+
+            <div className="home-products-row">
+              {finalHomeProducts.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <div className="final-brand-message">
+            <h3>{t[language].finalTitle}</h3>
+            <p>{t[language].finalText}</p>
+          </div>
+        </>
+      ) : page === "product" && selectedProduct ? (
+        renderProductDetails()
+      ) : (
+        <main className="shop-page">
+          <section className="shop-hero">
+            <p className="section-tag">SHOP ELORIA</p>
+            <h1>Explore the full collection</h1>
+            <p>
+              Browse all products, search by name, or choose a category from the top menu.
+            </p>
+          </section>
+
+          <div className="search-box shop-search-box">
+            <input
+              type="text"
+              placeholder={t[language].searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="sort-box">
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="default">{t[language].sortDefault}</option>
+              <option value="low-to-high">{t[language].lowToHigh}</option>
+              <option value="high-to-low">{t[language].highToLow}</option>
+            </select>
+          </div>
+
+          <div className="clear-filters-box">
+            <button
+              className="clear-filters-btn"
+              onClick={() => {
+                clearFilters();
+                setPage("shop");
+              }}
+            >
+              {t[language].clearFilters}
+            </button>
+          </div>
+
+          <div id="products-section" className="shop-products-anchor">
+            <p className="products-count">
+              {isArabic
+                ? `عرض ${filteredProducts.length} منتجات`
+                : `Showing ${filteredProducts.length} products`}
+            </p>
+          </div>
+
+          <div className="products-container">
+            {loading ? (
+              <div className="loader"></div>
+            ) : filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => renderStoreProductCard(product))
+            ) : (
+              <p className="no-products-message">{t[language].noProducts}</p>
+            )}
+          </div>
+        </main>
+      )}
       {showFavorites && (
         <div className="favorites-overlay" onClick={() => setShowFavorites(false)}>
           <div className="favorites-popup" onClick={(e) => e.stopPropagation()}>
             <div className="favorites-popup-header">
-              <h2>My Favorites ❤️</h2>
+              <h2>{t[language].favorites}</h2>
               <button
                 className="close-cart-btn"
                 onClick={() => setShowFavorites(false)}
@@ -1534,7 +1907,7 @@ function App() {
         <div className="cart-overlay" onClick={() => setShowCart(false)}>
           <div className="cart-popup" onClick={(e) => e.stopPropagation()}>
             <div className="cart-popup-header">
-              <h2>Shopping Cart 🛒</h2>
+             <h2>{t[language].cart}</h2>
               <button
                 className="close-cart-btn"
                 onClick={() => setShowCart(false)}
@@ -1608,7 +1981,7 @@ function App() {
         >
           <div className="checkout-popup" onClick={(e) => e.stopPropagation()}>
             <div className="checkout-popup-header">
-              <h2>Customer Information</h2>
+             <h2>{t[language].checkout}</h2>
               <button
                 className="close-product-btn"
                 onClick={() => setShowCheckout(false)}
@@ -1663,94 +2036,7 @@ function App() {
         </div>
       )}
 
-      {selectedProduct && (
-        <div
-          className="product-modal-overlay"
-          onClick={() => setSelectedProduct(null)}
-        >
-          <div className="product-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="close-product-btn"
-              onClick={() => setSelectedProduct(null)}
-            >
-              ✕
-            </button>
-<button
-  className={`modal-favorite-btn ${
-    isFavorite(selectedProduct.id) ? "active-favorite" : ""
-  }`}
-  onClick={() => toggleFavorite(selectedProduct)}
->
-  {isFavorite(selectedProduct.id) ? "❤" : "♡"}
-</button>
-            <img
-              src={selectedImage}
-              alt={selectedProduct.name}
-              className="product-modal-image"
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = defaultProductImage;
-              }}
-            />
 
-            <p className="gallery-label">Product Gallery</p>
-
-            <div className="product-thumbnails">
-              {[
-                selectedProduct.image_url,
-                selectedProduct.image_url_2,
-                selectedProduct.image_url_3
-              ]
-                .filter(Boolean)
-                .map((image, index) => (
-                  <img
-                    key={index}
-                    src={image || defaultProductImage}
-                    alt={`thumbnail-${index}`}
-                    className={`product-thumbnail ${
-                      selectedImage === image ? "active-thumb" : ""
-                    }`}
-                    onClick={() => setSelectedImage(image)}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = defaultProductImage;
-                    }}
-                  />
-                ))}
-            </div>
-
-            <h2>{selectedProduct.name}</h2>
-            <p className="product-shade-label">
-              Shade / Variant details included in product name
-            </p>
-            <p className="product-modal-description">
-              A beautiful ELORIA pick designed to add a soft, elegant touch to
-              your makeup collection.
-            </p>
-            <p>
-              <strong>Price:</strong> {selectedProduct.price} ₪
-            </p>
-
-            <span
-              className={`stock-badge ${
-                selectedProduct.stock === 0 ? "out-stock" : "in-stock"
-              }`}
-            >
-              {selectedProduct.stock === 0 ? "Out of Stock" : "Available"}
-            </span>
-
-            <div style={{ marginTop: "16px" }}>
-              <button
-                className="confirm-btn"
-                onClick={() => addToCart(selectedProduct)}
-                disabled={selectedProduct.stock === 0}
-              >
-                {selectedProduct.stock === 0 ? "Out of Stock" : "Add to Cart"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {toast.show && (
         <div className={`toast-message toast-${toast.type}`}>
@@ -1758,13 +2044,8 @@ function App() {
         </div>
       )}
 
-      <div className="final-brand-message">
-        <h3>Thank you for visiting ELORIA 💕</h3>
-        <p>We hope you find your next beauty favorite with us.</p>
-      </div>
-
       <footer className="site-footer">
-        <p>ELORIA © 2026 — Beauty with a soft elegant touch ✨</p>
+        <p>{t[language].footer}</p>
       </footer>
     </div>
   );
