@@ -78,6 +78,43 @@ const getProductImages = (product) => {
   return images.length > 0 ? images : [defaultProductImage];
 };
 
+const getBaseProductName = (name = "") => {
+  return name
+    .replace(/\s+[–—-]\s+[^–—-]+$/, "")
+    .trim()
+    .toLowerCase();
+};
+
+const getDisplayProductName = (name = "") => {
+  return name.replace(/\s+[–—-]\s+[^–—-]+$/, "").trim();
+};
+
+const getShadeName = (name = "") => {
+  const parts = name.split(/\s+[–—-]\s+/);
+  return parts.length > 1 ? parts[parts.length - 1].trim() : "";
+};
+
+const getProductVariants = (product) => {
+  if (!product?.name) return [];
+
+  const baseName = getBaseProductName(product.name);
+
+  return products.filter(
+    (item) =>
+      item.id !== product.id &&
+      String(item.category_id) === String(product.category_id) &&
+      getBaseProductName(item.name) === baseName
+  );
+};
+
+const getAllProductVariants = (product) => {
+  if (!product?.name) return [];
+
+  const variants = [product, ...getProductVariants(product)];
+
+  return variants.sort((a, b) => a.name.localeCompare(b.name));
+};
+
 const [previewImages, setPreviewImages] = useState({
   image: null,
   image2: null,
@@ -1415,7 +1452,46 @@ setPreviewImages({
       </div>
 
       <div className="product-card-body">
-        <h3>{product.name}</h3>
+        <h3>{getDisplayProductName(product.name)}</h3>
+
+        {getAllProductVariants(product).length > 1 && (
+          <div className="product-variants-preview">
+            <div className="variant-dots">
+              {getAllProductVariants(product).slice(0, 5).map((variant) => (
+                <button
+                  key={variant.id}
+                  className={`variant-dot ${
+                    variant.id === product.id ? "active-variant-dot" : ""
+                  }`}
+                  title={getShadeName(variant.name) || variant.name}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedProduct(variant);
+                    setSelectedImage(getProductImages(variant)[0]);
+                    setPage("product");
+                    setTimeout(() => {
+                      window.scrollTo({ top: 0, behavior: "smooth" });
+                    }, 50);
+                  }}
+                >
+                  <img
+                    src={getImageUrl(variant.image_url)}
+                    alt={variant.name}
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = defaultProductImage;
+                    }}
+                  />
+                </button>
+              ))}
+            </div>
+
+            <span className="variants-count">
+              Available in {getAllProductVariants(product).length} shades
+            </span>
+          </div>
+        )}
+
         <p className="product-price">{product.price} ₪</p>
 
         {product.stock === 0 && (
@@ -1550,11 +1626,44 @@ setPreviewImages({
 
           <div className="product-details-info">
             <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
-            <h1>{selectedProduct.name}</h1>
+            <h1>{getDisplayProductName(selectedProduct.name)}</h1>
 
             <p className="product-details-shade">
-              Shade / Variant details are included in the product name.
+              {getShadeName(selectedProduct.name)
+                ? `Shade: ${getShadeName(selectedProduct.name)}`
+                : "Soft ELORIA beauty pick"}
             </p>
+
+            {getAllProductVariants(selectedProduct).length > 1 && (
+              <div className="details-variants-box">
+                <p>Choose shade</p>
+
+                <div className="details-variant-list">
+                  {getAllProductVariants(selectedProduct).map((variant) => (
+                    <button
+                      key={variant.id}
+                      className={`details-variant-btn ${
+                        variant.id === selectedProduct.id ? "active-details-variant" : ""
+                      }`}
+                      onClick={() => {
+                        setSelectedProduct(variant);
+                        setSelectedImage(getProductImages(variant)[0]);
+                      }}
+                    >
+                      <img
+                        src={getImageUrl(variant.image_url)}
+                        alt={variant.name}
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProductImage;
+                        }}
+                      />
+                      <span>{getShadeName(variant.name) || variant.name}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <p className="product-details-description">
               A beautiful ELORIA pick designed to add a soft, elegant touch to
