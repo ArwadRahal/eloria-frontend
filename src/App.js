@@ -7,7 +7,6 @@ import eloriaLogo from "./images/eloria-logo.png";
 function App() {
   const API_URL =
     process.env.REACT_APP_API_URL || "https://eloria-backend.onrender.com";
-
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
 
@@ -253,6 +252,49 @@ const t = {
     } catch (err) {
       console.log(err);
       showToastMessage("Error adding category.", "error");
+    }
+  };
+
+  const handleDeleteCategory = async (category) => {
+    const productsInCategory = products.filter(
+      (product) => String(product.category_id) === String(category.id)
+    );
+
+    if (productsInCategory.length > 0) {
+      showToastMessage(
+        `Cannot delete ${category.name}. It has ${productsInCategory.length} products.`,
+        "error"
+      );
+      return;
+    }
+
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the category "${category.name}"?`
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      const response = await fetch(`${API_URL}/categories/${category.id}`, {
+        method: "DELETE"
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToastMessage("Category deleted successfully 🗑️", "success");
+
+        if (String(selectedCategory) === String(category.id)) {
+          setSelectedCategory("all");
+        }
+
+        fetchCategories();
+      } else {
+        showToastMessage(data.error || "Failed to delete category.", "error");
+      }
+    } catch (err) {
+      console.log(err);
+      showToastMessage("Error deleting category.", "error");
     }
   };
 
@@ -1218,14 +1260,40 @@ setPreviewImages({
         </button>
       </div>
 
+      <p className="categories-note">
+        You can delete a category only if it has no products connected to it.
+      </p>
+
       <div className="categories-list">
         {categories.length > 0 ? (
-          categories.map((category) => (
-            <div key={category.id} className="category-admin-card">
-              <span className="category-admin-id">#{category.id}</span>
-              <strong>{category.name}</strong>
-            </div>
-          ))
+          categories.map((category) => {
+            const productCount = products.filter(
+              (product) => String(product.category_id) === String(category.id)
+            ).length;
+
+            return (
+              <div key={category.id} className="category-admin-card">
+                <div className="category-admin-info">
+                  <span className="category-admin-id">#{category.id}</span>
+                  <strong>{category.name}</strong>
+                  <small>{productCount} products</small>
+                </div>
+
+                <button
+                  className="delete-category-btn"
+                  onClick={() => handleDeleteCategory(category)}
+                  disabled={productCount > 0}
+                  title={
+                    productCount > 0
+                      ? "Move or delete products from this category first"
+                      : "Delete category"
+                  }
+                >
+                  Delete
+                </button>
+              </div>
+            );
+          })
         ) : (
           <p className="no-admin-orders-message">No categories found yet.</p>
         )}
@@ -1793,7 +1861,34 @@ setPreviewImages({
       </div>
     );
   }
+let isDown = false;
+let startX;
+let scrollLeft;
 
+const startDrag = (e) => {
+  const slider = e.currentTarget;
+  isDown = true;
+  slider.classList.add("dragging");
+
+  startX = e.pageX - slider.offsetLeft;
+  scrollLeft = slider.scrollLeft;
+};
+
+const onDrag = (e) => {
+  if (!isDown) return;
+
+  const slider = e.currentTarget;
+  e.preventDefault();
+
+  const x = e.pageX - slider.offsetLeft;
+  const walk = (x - startX) * 1.5;
+
+  slider.scrollLeft = scrollLeft - walk;
+};
+
+const stopDrag = () => {
+  isDown = false;
+};
   return (
     <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
       <div className="luxury-navbar">
@@ -1810,15 +1905,59 @@ setPreviewImages({
           </div>
         </div>
 
-        <div className="nav-center">
-          {categories.map((category) => (
+<div
+  className="nav-center"
+  onMouseDown={(e) => startDrag(e)}
+  onMouseMove={(e) => onDrag(e)}
+  onMouseUp={stopDrag}
+  onMouseLeave={stopDrag}
+>          <div className="nav-marquee">
             <button
-              key={category.id}
-              onClick={() => handleCategorySelect(String(category.id))}
+              className={selectedCategory === "all" ? "active-nav-category" : ""}
+              onClick={handleShopNow}
             >
-              {category.name}
+              Shop All
             </button>
-          ))}
+
+            {categories.map((category) => (
+              <button
+                key={`main-${category.id}`}
+                className={
+                  String(selectedCategory) === String(category.id)
+                    ? "active-nav-category"
+                    : ""
+                }
+                onClick={() => handleCategorySelect(String(category.id))}
+              >
+                {category.name}
+              </button>
+            ))}
+
+            <button
+              className={selectedCategory === "all" ? "active-nav-category" : ""}
+              onClick={handleShopNow}
+              aria-hidden="true"
+              tabIndex="-1"
+            >
+              Shop All
+            </button>
+
+            {categories.map((category) => (
+              <button
+                key={`copy-${category.id}`}
+                className={
+                  String(selectedCategory) === String(category.id)
+                    ? "active-nav-category"
+                    : ""
+                }
+                onClick={() => handleCategorySelect(String(category.id))}
+                aria-hidden="true"
+                tabIndex="-1"
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div className="nav-right">
