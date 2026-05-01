@@ -47,6 +47,36 @@ function App() {
 const [language, setLanguage] = useState("en");
 
 const isArabic = language === "ar";
+const getImageUrl = (url) => {
+  if (!url) return defaultProductImage;
+
+  if (url.startsWith("blob:") || url.startsWith("data:")) {
+    return url;
+  }
+
+  if (url.startsWith("http://")) {
+    return url.replace("http://", "https://");
+  }
+
+  if (url.startsWith("/uploads/")) {
+    return `${API_URL}${url}`;
+  }
+
+  return url;
+};
+
+const getProductImages = (product) => {
+  const images = [
+    product?.image_url,
+    product?.image_url_2,
+    product?.image_url_3
+  ]
+    .filter(Boolean)
+    .map(getImageUrl);
+
+  return images.length > 0 ? images : [defaultProductImage];
+};
+
 const [previewImages, setPreviewImages] = useState({
   image: null,
   image2: null,
@@ -1058,7 +1088,7 @@ setPreviewImages({
                     <tr key={product.id}>
                       <td>
                         <img
-                          src={product.image_url || defaultProductImage}
+                          src={getImageUrl(product.image_url)}
                           alt={product.name}
                           className="admin-table-image"
                           onError={(e) => {
@@ -1203,12 +1233,7 @@ setPreviewImages({
       className="product-card"
       onClick={() => {
         setSelectedProduct(product);
-        setSelectedImage(
-          product.image_url ||
-            product.image_url_2 ||
-            product.image_url_3 ||
-            defaultProductImage
-        );
+        setSelectedImage(getProductImages(product)[0]);
         setPage("product");
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1229,7 +1254,7 @@ setPreviewImages({
 
       <div className="product-image-wrap">
         <img
-          src={product.image_url || defaultProductImage}
+          src={getImageUrl(product.image_url)}
           alt={product.name}
           className="product-image"
           onError={(e) => {
@@ -1265,14 +1290,7 @@ setPreviewImages({
   const renderProductDetails = () => {
     if (!selectedProduct) return null;
 
-    const productImages = [
-      selectedProduct.image_url,
-      selectedProduct.image_url_2,
-      selectedProduct.image_url_3
-    ].filter(Boolean);
-
-    const galleryImages =
-      productImages.length > 0 ? productImages : [defaultProductImage];
+    const galleryImages = getProductImages(selectedProduct);
 
     const relatedProducts = products
       .filter(
@@ -1308,7 +1326,7 @@ setPreviewImages({
           <div className="product-details-gallery">
             <div className="product-details-main-image-box">
               <img
-                src={selectedImage || galleryImages[0]}
+                src={getImageUrl(selectedImage || galleryImages[0])}
                 alt={selectedProduct.name}
                 className="product-details-main-image"
                 onError={(e) => {
@@ -1328,7 +1346,7 @@ setPreviewImages({
                   onClick={() => setSelectedImage(image)}
                 >
                   <img
-                    src={image}
+                    src={getImageUrl(image)}
                     alt={`${selectedProduct.name} ${index + 1}`}
                     onError={(e) => {
                       e.target.onerror = null;
@@ -1586,7 +1604,7 @@ setPreviewImages({
       <div className="preview-images">
         {(previewImages.image || editingProduct.image_url) && (
           <img
-            src={previewImages.image || editingProduct.image_url}
+            src={previewImages.image || getImageUrl(editingProduct.image_url)}
             alt="preview 1"
             onError={(e) => {
               e.target.onerror = null;
@@ -1597,7 +1615,7 @@ setPreviewImages({
 
         {(previewImages.image2 || editingProduct.image_url_2) && (
           <img
-            src={previewImages.image2 || editingProduct.image_url_2}
+            src={previewImages.image2 || getImageUrl(editingProduct.image_url_2)}
             alt="preview 2"
             onError={(e) => {
               e.target.onerror = null;
@@ -1608,7 +1626,7 @@ setPreviewImages({
 
         {(previewImages.image3 || editingProduct.image_url_3) && (
           <img
-            src={previewImages.image3 || editingProduct.image_url_3}
+            src={previewImages.image3 || getImageUrl(editingProduct.image_url_3)}
             alt="preview 3"
             onError={(e) => {
               e.target.onerror = null;
@@ -1865,7 +1883,7 @@ setPreviewImages({
                 {favorites.map((item) => (
                   <div key={item.id} className="favorite-product-card">
                     <img
-                      src={item.image_url || defaultProductImage}
+                      src={getImageUrl(item.image_url)}
                       alt={item.name}
                       className="favorite-product-image"
                       onError={(e) => {
