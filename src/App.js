@@ -45,6 +45,8 @@ function App() {
   const [showFavorites, setShowFavorites] = useState(false);
   const [page, setPage] = useState("home");
 const [language, setLanguage] = useState("en");
+  const [categories, setCategories] = useState([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
 
 const isArabic = language === "ar";
 const getImageUrl = (url) => {
@@ -211,6 +213,49 @@ const t = {
     notes: ""
   });
 
+  const fetchCategories = async () => {
+    try {
+      const res = await fetch(`${API_URL}/categories`);
+      const data = await res.json();
+      setCategories(Array.isArray(data) ? data : []);
+    } catch (err) {
+      console.log(err);
+      setCategories([]);
+    }
+  };
+
+  const handleAddCategory = async () => {
+    const trimmedName = newCategoryName.trim();
+
+    if (!trimmedName) {
+      showToastMessage("Please enter a category name.", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/categories`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name: trimmedName })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToastMessage("Category added successfully ✨", "success");
+        setNewCategoryName("");
+        fetchCategories();
+      } else {
+        showToastMessage(data.error || "Failed to add category.", "error");
+      }
+    } catch (err) {
+      console.log(err);
+      showToastMessage("Error adding category.", "error");
+    }
+  };
+
   const fetchProducts = async () => {
     try {
       setLoading(true);
@@ -239,6 +284,7 @@ const t = {
   useEffect(() => {
     fetchProducts();
     fetchOrders();
+    fetchCategories();
   }, []);
 
   useEffect(() => {
@@ -280,14 +326,11 @@ const t = {
   };
 
   const getCategoryName = (categoryId) => {
-    const categories = {
-      1: "Lip Liner",
-      2: "Eyeliner",
-      3: "Mascara",
-      6: "Blush",
-      7: "Lips"
-    };
-    return categories[categoryId] || "Unknown";
+    const foundCategory = categories.find(
+      (category) => String(category.id) === String(categoryId)
+    );
+
+    return foundCategory ? foundCategory.name : "Unknown";
   };
 
   const handleHiddenAdminEntry = () => {
@@ -1152,6 +1195,45 @@ setPreviewImages({
     );
   };
 
+ const renderAdminCategories = () => {
+  return (
+    <div className="admin-form-page admin-categories-page">
+      <h3>Manage Categories</h3>
+
+      <div className="category-add-row">
+        <input
+          type="text"
+          placeholder="New category name"
+          value={newCategoryName}
+          onChange={(e) => setNewCategoryName(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleAddCategory();
+            }
+          }}
+        />
+
+        <button className="submit-order-btn" onClick={handleAddCategory}>
+          Add Category
+        </button>
+      </div>
+
+      <div className="categories-list">
+        {categories.length > 0 ? (
+          categories.map((category) => (
+            <div key={category.id} className="category-admin-card">
+              <span className="category-admin-id">#{category.id}</span>
+              <strong>{category.name}</strong>
+            </div>
+          ))
+        ) : (
+          <p className="no-admin-orders-message">No categories found yet.</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
  const renderAddProduct = () => {
   return (
     <div className="add-product-form admin-form-page">
@@ -1186,11 +1268,11 @@ setPreviewImages({
         value={newProduct.category_id}
         onChange={handleNewProductChange}
       >
-        <option value="1">Lip Liner</option>
-        <option value="2">Eyeliner</option>
-        <option value="3">Mascara</option>
-        <option value="6">Blush</option>
-        <option value="7">Lips</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
       </select>
 
       <label>Main Image</label>
@@ -1291,6 +1373,20 @@ setPreviewImages({
     if (!selectedProduct) return null;
 
     const galleryImages = getProductImages(selectedProduct);
+    const currentImageIndex = galleryImages.findIndex((image) => image === selectedImage);
+    const safeImageIndex = currentImageIndex === -1 ? 0 : currentImageIndex;
+
+    const goToPreviousImage = () => {
+      const previousIndex =
+        safeImageIndex === 0 ? galleryImages.length - 1 : safeImageIndex - 1;
+      setSelectedImage(galleryImages[previousIndex]);
+    };
+
+    const goToNextImage = () => {
+      const nextIndex =
+        safeImageIndex === galleryImages.length - 1 ? 0 : safeImageIndex + 1;
+      setSelectedImage(galleryImages[nextIndex]);
+    };
 
     const relatedProducts = products
       .filter(
@@ -1325,6 +1421,16 @@ setPreviewImages({
         <section className="product-details-layout">
           <div className="product-details-gallery">
             <div className="product-details-main-image-box">
+              {galleryImages.length > 1 && (
+                <button
+                  className="image-arrow image-arrow-left"
+                  onClick={goToPreviousImage}
+                  aria-label="Previous product image"
+                >
+                  ‹
+                </button>
+              )}
+
               <img
                 src={getImageUrl(selectedImage || galleryImages[0])}
                 alt={selectedProduct.name}
@@ -1334,6 +1440,22 @@ setPreviewImages({
                   e.target.src = defaultProductImage;
                 }}
               />
+
+              {galleryImages.length > 1 && (
+                <button
+                  className="image-arrow image-arrow-right"
+                  onClick={goToNextImage}
+                  aria-label="Next product image"
+                >
+                  ›
+                </button>
+              )}
+
+              {galleryImages.length > 1 && (
+                <div className="image-counter">
+                  {safeImageIndex + 1} / {galleryImages.length}
+                </div>
+              )}
             </div>
 
             <div className="product-details-thumbnails">
@@ -1469,6 +1591,15 @@ setPreviewImages({
 
           <button
             className={
+              adminView === "categories" ? "sidebar-link active" : "sidebar-link"
+            }
+            onClick={() => setAdminView("categories")}
+          >
+            Categories
+          </button>
+
+          <button
+            className={
               adminView === "add-product"
                 ? "sidebar-link active"
                 : "sidebar-link"
@@ -1489,6 +1620,7 @@ setPreviewImages({
               {adminView === "dashboard" && "Admin Dashboard"}
               {adminView === "orders" && "Orders Management"}
               {adminView === "products" && "Products Management"}
+              {adminView === "categories" && "Categories Management"}
               {adminView === "add-product" && "Add New Product"}
             </h2>
           </div>
@@ -1496,6 +1628,7 @@ setPreviewImages({
           {adminView === "dashboard" && renderAdminDashboardCards()}
           {adminView === "orders" && renderAdminOrders()}
           {adminView === "products" && renderAdminProducts()}
+          {adminView === "categories" && renderAdminCategories()}
           {adminView === "add-product" && renderAddProduct()}
         </main>
 
@@ -1546,11 +1679,11 @@ setPreviewImages({
         value={editingProduct.category_id}
         onChange={handleEditChange}
       >
-        <option value="1">Lip Liner</option>
-        <option value="2">Eyeliner</option>
-        <option value="3">Mascara</option>
-        <option value="6">Blush</option>
-        <option value="7">Lips</option>
+        {categories.map((category) => (
+          <option key={category.id} value={category.id}>
+            {category.name}
+          </option>
+        ))}
       </select>
 
       <label>Main Image</label>
@@ -1678,11 +1811,14 @@ setPreviewImages({
         </div>
 
         <div className="nav-center">
-          <button onClick={() => handleCategorySelect("1")}>Lip Liner</button>
-          <button onClick={() => handleCategorySelect("2")}>Eyeliner</button>
-          <button onClick={() => handleCategorySelect("3")}>Mascara</button>
-          <button onClick={() => handleCategorySelect("6")}>Blush</button>
-          <button onClick={() => handleCategorySelect("7")}>Lips</button>
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              onClick={() => handleCategorySelect(String(category.id))}
+            >
+              {category.name}
+            </button>
+          ))}
         </div>
 
         <div className="nav-right">
