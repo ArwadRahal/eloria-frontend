@@ -5357,3 +5357,128 @@ button:disabled {
   object-fit: contain !important;
   background: transparent !important;
 }
+/* PRODUCT DETAILS - BIG LUXURY IMAGE LIKE REAL STORES */
+
+.product-details-layout {
+  max-width: 1380px !important;
+  grid-template-columns: 1.15fr 0.85fr !important;
+  gap: 70px !important;
+  align-items: start !important;
+}
+
+.product-details-gallery {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.product-details-main-image-box {
+  height: 680px !important;
+  min-height: 680px !important;
+  background: #ffffff !important;
+  border: none !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-shadow: none !important;
+}
+
+.product-details-main-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 0 !important;
+}
+
+.product-details-main-image-box:hover .product-details-main-image {
+  transform: none !important;
+}
+
+.product-details-thumbnails {
+  justify-content: flex-start !important;
+  margin-top: 22px !important;
+  gap: 14px !important;
+}
+
+.product-details-thumb-btn {
+  width: 92px !important;
+  height: 92px !important;
+  background: #ffffff !important;
+  border: 1px solid #ffd6e5 !important;
+  border-radius: 14px !important;
+  padding: 4px !important;
+}
+
+.product-details-thumb-btn img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+.product-details-info {
+  margin-top: 40px !important;
+}
+
+/* PRODUCT CARDS - BIGGER IMAGES */
+.product-image-wrap {
+  height: 330px !important;
+  background: #ffffff !important;
+  padding: 0 !important;
+}
+
+.product-image {
+  width: 92% !important;
+  height: 92% !important;
+  object-fit: contain !important;
+  background: transparent !important;
+  padding: 0 !important;
+}
+/* REMOVE CARD LOOK - MAKE EVERYTHING ONE BACKGROUND */
+
+.product-details-layout {
+  max-width: 1350px !important;
+  grid-template-columns: 1.1fr 0.9fr !important;
+  gap: 60px !important;
+  background: transparent !important;
+}
+
+/* LEFT SIDE (IMAGE) */
+.product-details-gallery {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+.product-details-main-image-box {
+  height: 650px !important;
+  background: transparent !important; /* 👈 مهم */
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.product-details-main-image {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  background: transparent !important;
+}
+
+/* RIGHT SIDE (TEXT) */
+.product-details-info {
+  background: transparent !important; /* 👈 هذا اللي كان ناقص */
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* OPTIONAL: remove rounded look */
+.product-details-info,
+.product-details-gallery {
+  border-radius: 0 !important;
+}
