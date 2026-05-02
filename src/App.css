@@ -5482,3 +5482,103 @@ button:disabled {
 .product-details-gallery {
   border-radius: 0 !important;
 }
+/* MOBILE PRODUCT DETAILS FIX - FINAL */
+
+@media (max-width: 768px) {
+  .product-details-page {
+    padding: 130px 16px 40px !important;
+  }
+
+  .product-details-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 28px !important;
+    max-width: 100% !important;
+  }
+
+  .product-details-gallery {
+    width: 100% !important;
+    order: 1 !important;
+  }
+
+  .product-details-info {
+    width: 100% !important;
+    order: 2 !important;
+    margin-top: 0 !important;
+    padding: 0 !important;
+    text-align: left !important;
+  }
+
+  .product-details-main-image-box {
+    width: 100% !important;
+    height: 430px !important;
+    min-height: 430px !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .product-details-main-image {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center !important;
+  }
+
+  .product-details-info h1 {
+    font-size: 38px !important;
+    line-height: 1.05 !important;
+    margin-top: 8px !important;
+  }
+
+  .product-details-description {
+    font-size: 16px !important;
+    line-height: 1.7 !important;
+    max-width: 100% !important;
+  }
+
+  .product-details-price-row {
+    margin-top: 22px !important;
+  }
+
+  .product-details-price {
+    font-size: 34px !important;
+  }
+
+  .product-details-actions {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+
+  .details-add-cart-btn,
+  .details-favorite-btn {
+    width: 100% !important;
+  }
+
+  .product-details-thumbnails {
+    justify-content: center !important;
+    margin-top: 18px !important;
+  }
+
+  .product-details-thumb-btn {
+    width: 78px !important;
+    height: 78px !important;
+  }
+}
+
+@media (max-width: 430px) {
+  .product-details-main-image-box {
+    height: 360px !important;
+    min-height: 360px !important;
+  }
+
+  .product-details-info h1 {
+    font-size: 32px !important;
+  }
+
+  .product-details-description {
+    font-size: 15px !important;
+  }
+}
