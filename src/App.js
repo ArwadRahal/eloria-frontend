@@ -52,6 +52,7 @@ const [language, setLanguage] = useState("en");
 const isArabic = language === "ar";
 const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
 const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
+const CART_STORAGE_KEY = "eloria_cart_v1";
 const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
 
@@ -270,6 +271,10 @@ const t = {
     notes: ""
   });
 
+  const [checkoutErrors, setCheckoutErrors] = useState({});
+  const [lastOrderId, setLastOrderId] = useState(null);
+  const [showOrderSuccess, setShowOrderSuccess] = useState(false);
+
   const fetchCategories = async () => {
     try {
       const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
@@ -444,7 +449,23 @@ const t = {
     if (savedFavorites) {
       setFavorites(JSON.parse(savedFavorites));
     }
+
+    const savedCart = localStorage.getItem(CART_STORAGE_KEY);
+    if (savedCart) {
+      try {
+        const parsedCart = JSON.parse(savedCart);
+        if (Array.isArray(parsedCart)) {
+          setCart(parsedCart);
+        }
+      } catch (err) {
+        console.log("Cart restore error:", err);
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
+  }, [cart]);
 
   useEffect(() => {
     if (products.length === 0) return;
@@ -616,6 +637,13 @@ const t = {
       ...customerInfo,
       [name]: value
     });
+
+    if (checkoutErrors[name]) {
+      setCheckoutErrors({
+        ...checkoutErrors,
+        [name]: ""
+      });
+    }
   };
 
   const handleNewProductChange = (e) => {
@@ -787,6 +815,32 @@ setPreviewImages({
     }
   };
 
+  const validateCheckoutForm = () => {
+    const errors = {};
+    const normalizedPhone = customerInfo.phone.replace(/\D/g, "");
+
+    if (!customerInfo.fullName.trim()) {
+      errors.fullName = "Full name is required";
+    }
+
+    if (!customerInfo.phone.trim()) {
+      errors.phone = "Phone number is required";
+    } else if (normalizedPhone.length < 7) {
+      errors.phone = "Please enter a valid phone number";
+    }
+
+    if (!customerInfo.city.trim()) {
+      errors.city = "City is required";
+    }
+
+    if (!customerInfo.address.trim()) {
+      errors.address = "Address is required";
+    }
+
+    setCheckoutErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handlePlaceOrder = async () => {
     if (isSubmittingOrder) return;
 
@@ -795,20 +849,8 @@ setPreviewImages({
       return;
     }
 
-    const normalizedPhone = customerInfo.phone.replace(/\D/g, "");
-
-    if (
-      !customerInfo.fullName.trim() ||
-      !customerInfo.phone.trim() ||
-      !customerInfo.city.trim() ||
-      !customerInfo.address.trim()
-    ) {
-      showToastMessage("Please fill in all required fields.", "error");
-      return;
-    }
-
-    if (normalizedPhone.length < 7) {
-      showToastMessage("Please enter a valid phone number.", "error");
+    if (!validateCheckoutForm()) {
+      showToastMessage("Please check the highlighted fields.", "error");
       return;
     }
 
@@ -840,7 +882,10 @@ setPreviewImages({
           address: "",
           notes: ""
         });
+        setLastOrderId(data.orderId || null);
+        setShowOrderSuccess(true);
         setShowCheckout(false);
+        setShowCart(false);
         fetchProducts();
         fetchOrders();
       } else {
@@ -2453,73 +2498,756 @@ const stopDrag = () => {
       )}
 
       {showCart && (
-        <div className="cart-overlay" onClick={() => setShowCart(false)}>
-          <div className="cart-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="cart-popup-header">
-             <h2>{t[language].cart}</h2>
+        <div className="cart-overlay premium-cart-overlay" onClick={() => setShowCart(false)}>
+          <aside className="cart-popup premium-cart-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="cart-popup-header premium-cart-header">
+              <div>
+                <p className="cart-mini-label">Your ELORIA bag</p>
+                <h2>{t[language].cart}</h2>
+              </div>
+
               <button
-                className="close-cart-btn"
+                className="close-cart-btn premium-close-btn"
                 onClick={() => setShowCart(false)}
+                aria-label="Close cart"
               >
                 ✕
               </button>
             </div>
 
             {cart.length === 0 ? (
-              <p className="empty-cart-text">Your cart is empty.</p>
+              <div className="premium-empty-cart">
+                <div className="empty-cart-icon">♡</div>
+                <h3>Your bag is empty</h3>
+                <p>Add your favorite ELORIA picks and come back here to complete your order.</p>
+                <button
+                  className="confirm-btn"
+                  onClick={() => {
+                    setShowCart(false);
+                    handleShopNow();
+                  }}
+                >
+                  Start Shopping
+                </button>
+              </div>
             ) : (
               <>
-                <div className="cart-popup-items">
+                <div className="cart-popup-items premium-cart-items">
                   {cart.map((item) => (
-                    <div key={item.id} className="cart-item-card">
-                      <h4>{item.name}</h4>
-                      <p>Price: {item.price} ₪</p>
-                      <p>Quantity: {item.quantity}</p>
+                    <div key={item.id} className="cart-item-card premium-cart-item">
+                      <img
+                        src={getImageUrl(item.image_url)}
+                        alt={item.name}
+                        className="cart-item-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProductImage;
+                        }}
+                      />
 
-                      <div className="quantity-controls">
-                        <button
-                          className="qty-btn"
-                          onClick={() => increaseQuantity(item.id)}
-                        >
-                          +
-                        </button>
+                      <div className="cart-item-info">
+                        <div className="cart-item-top">
+                          <div>
+                            <h4>{getDisplayProductName(item.name)}</h4>
+                            {getShadeName(item.name) && (
+                              <p className="cart-item-shade">{getShadeName(item.name)}</p>
+                            )}
+                          </div>
 
-                        <button
-                          className="qty-btn"
-                          onClick={() => decreaseQuantity(item.id)}
-                        >
-                          -
-                        </button>
+                          <button
+                            className="cart-item-remove-x"
+                            onClick={() => removeFromCart(item.id)}
+                            aria-label="Remove item"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="cart-item-bottom">
+                          <div className="quantity-controls premium-quantity-controls">
+                            <button
+                              className="qty-btn"
+                              onClick={() => decreaseQuantity(item.id)}
+                              aria-label="Decrease quantity"
+                            >
+                              −
+                            </button>
+
+                            <span className="cart-quantity-number">{item.quantity}</span>
+
+                            <button
+                              className="qty-btn"
+                              onClick={() => increaseQuantity(item.id)}
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <strong className="cart-line-total">
+                            {(Number(item.price) * item.quantity).toFixed(2)} ₪
+                          </strong>
+                        </div>
                       </div>
-
-                      <button
-                        className="cart-remove-btn"
-                        onClick={() => removeFromCart(item.id)}
-                      >
-                        Remove
-                      </button>
                     </div>
                   ))}
                 </div>
 
-                <h3 style={{ textAlign: "center", marginTop: "20px" }}>
-                  Total: {totalPrice} ₪
-                </h3>
+                <div className="premium-cart-footer">
+                  <div className="cart-total-line">
+                    <span>Items</span>
+                    <strong>{totalItems}</strong>
+                  </div>
 
-                <div style={{ textAlign: "center", marginTop: "20px" }}>
+                  <div className="cart-total-line cart-grand-total">
+                    <span>Total</span>
+                    <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
+                  </div>
+
+                  <p className="cart-delivery-note">Payment is collected on delivery.</p>
+
                   <button
-                    className="confirm-btn"
+                    className="confirm-btn premium-checkout-btn"
                     onClick={() => {
                       setShowCheckout(true);
                       setShowCart(false);
                     }}
                   >
-                    Confirm Order
+                    Continue to Checkout
                   </button>
                 </div>
               </>
             )}
+          </aside>
+        </div>
+      )}
+
+      {showCheckout && (
+        <div
+          className="checkout-overlay premium-checkout-overlay"
+          onClick={() => setShowCheckout(false)}
+        >
+          <div className="checkout-popup premium-checkout-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="checkout-popup-header premium-checkout-header">
+              <div>
+                <p className="checkout-step-label">Secure order details</p>
+                <h2>{t[language].checkout}</h2>
+                <span>Fill your delivery details to place the order.</span>
+              </div>
+
+              <button
+                className="close-product-btn premium-close-btn"
+                onClick={() => setShowCheckout(false)}
+                aria-label="Close checkout"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="checkout-layout-grid premium-checkout-grid">
+              <div className="checkout-form-fields premium-checkout-form">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Your full name"
+                  value={customerInfo.fullName}
+                  onChange={handleInputChange}
+                  className={checkoutErrors.fullName ? "input-error" : ""}
+                />
+                {checkoutErrors.fullName && <small className="field-error">{checkoutErrors.fullName}</small>}
+
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="05X-XXXXXXX"
+                  value={customerInfo.phone}
+                  onChange={handleInputChange}
+                  className={checkoutErrors.phone ? "input-error" : ""}
+                />
+                {checkoutErrors.phone && <small className="field-error">{checkoutErrors.phone}</small>}
+
+                <label>City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="City"
+                  value={customerInfo.city}
+                  onChange={handleInputChange}
+                  className={checkoutErrors.city ? "input-error" : ""}
+                />
+                {checkoutErrors.city && <small className="field-error">{checkoutErrors.city}</small>}
+
+                <label>Address *</label>
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Street, building, floor"
+                  value={customerInfo.address}
+                  onChange={handleInputChange}
+                  className={checkoutErrors.address ? "input-error" : ""}
+                />
+                {checkoutErrors.address && <small className="field-error">{checkoutErrors.address}</small>}
+
+                <label>Notes</label>
+                <textarea
+                  name="notes"
+                  placeholder="Any notes for delivery?"
+                  value={customerInfo.notes}
+                  onChange={handleInputChange}
+                ></textarea>
+              </div>
+
+              <div className="checkout-summary-card premium-checkout-summary">
+                <h3>Order Summary</h3>
+
+                <div className="checkout-summary-items">
+                  {cart.map((item) => (
+                    <div key={item.id} className="checkout-summary-item">
+                      <img
+                        src={getImageUrl(item.image_url)}
+                        alt={item.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProductImage;
+                        }}
+                      />
+
+                      <div>
+                        <strong>{getDisplayProductName(item.name)}</strong>
+                        {getShadeName(item.name) && <span>{getShadeName(item.name)}</span>}
+                        <p>Qty: {item.quantity} · {(Number(item.price) * item.quantity).toFixed(2)} ₪</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="checkout-total-row">
+                  <span>Items</span>
+                  <strong>{totalItems}</strong>
+                </div>
+
+                <div className="checkout-total-row checkout-final-total">
+                  <span>Total</span>
+                  <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
+                </div>
+
+                <p className="checkout-payment-note">
+                  Payment method: cash on delivery.
+                </p>
+
+                <button
+                  className="submit-order-btn premium-submit-order-btn"
+                  onClick={handlePlaceOrder}
+                  disabled={!isCheckoutValid || isSubmittingOrder}
+                >
+                  {isSubmittingOrder ? "Sending order..." : "Place Order"}
+                </button>
+              </div>
+            </div>
           </div>
+        </div>
+      )}
+
+      {showOrderSuccess && (
+        <div className="checkout-overlay premium-success-overlay" onClick={() => setShowOrderSuccess(false)}>
+          <div className="order-success-card" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="premium-close-btn success-close-btn"
+              onClick={() => setShowOrderSuccess(false)}
+              aria-label="Close success message"
+            >
+              ✕
+            </button>
+
+            <div className="success-icon">✓</div>
+            <h2>Order placed successfully</h2>
+            {lastOrderId && <p className="success-order-id">Order #{lastOrderId}</p>}
+            <p>Thank you for shopping with ELORIA. We will contact you soon to confirm delivery.</p>
+
+            <button
+              className="confirm-btn premium-checkout-btn"
+              onClick={() => {
+                setShowOrderSuccess(false);
+                handleShopNow();
+              }}
+            >
+              Continue Shopping
+            </button>
+          </div>
+        </div>
+      )}
+
+      {toast.show && (
+          <div className={`toast-message toast-${toast.type}`}>
+            {toast.message}
+          </div>
+        )}
+      </div>
+    );
+  }
+let isDown = false;
+let startX;
+let scrollLeft;
+
+const startDrag = (e) => {
+  const slider = e.currentTarget;
+  isDown = true;
+  slider.classList.add("dragging");
+
+  startX = e.pageX - slider.offsetLeft;
+  scrollLeft = slider.scrollLeft;
+};
+
+const onDrag = (e) => {
+  if (!isDown) return;
+
+  const slider = e.currentTarget;
+  e.preventDefault();
+
+  const x = e.pageX - slider.offsetLeft;
+  const walk = (x - startX) * 1.5;
+
+  slider.scrollLeft = scrollLeft - walk;
+};
+
+const stopDrag = () => {
+  isDown = false;
+};
+  return (
+    <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
+      <div className="luxury-navbar">
+        <div className="nav-left">
+          <div
+            className="logo luxury-logo"
+            onClick={() => {
+              setPage("home");
+              setSelectedCategory("all");
+              handleHiddenAdminEntry();
+            }}
+          >
+            <img src={eloriaLogo} alt="ELORIA Logo" />
+          </div>
+        </div>
+
+<div
+  className="nav-center"
+  onMouseDown={(e) => startDrag(e)}
+  onMouseMove={(e) => onDrag(e)}
+  onMouseUp={stopDrag}
+  onMouseLeave={stopDrag}
+>          <div className="nav-marquee">
+            <button
+              className={selectedCategory === "all" ? "active-nav-category" : ""}
+              onClick={handleShopNow}
+            >
+              Shop All
+            </button>
+
+            {categories.map((category) => (
+              <button
+                key={`main-${category.id}`}
+                className={
+                  String(selectedCategory) === String(category.id)
+                    ? "active-nav-category"
+                    : ""
+                }
+                onClick={() => handleCategorySelect(String(category.id))}
+              >
+                {category.name}
+              </button>
+            ))}
+
+            <button
+              className={selectedCategory === "all" ? "active-nav-category" : ""}
+              onClick={handleShopNow}
+              aria-hidden="true"
+              tabIndex="-1"
+            >
+              Shop All
+            </button>
+
+            {categories.map((category) => (
+              <button
+                key={`copy-${category.id}`}
+                className={
+                  String(selectedCategory) === String(category.id)
+                    ? "active-nav-category"
+                    : ""
+                }
+                onClick={() => handleCategorySelect(String(category.id))}
+                aria-hidden="true"
+                tabIndex="-1"
+              >
+                {category.name}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="nav-right">
+          <button className="nav-icon-btn" onClick={() => setShowFavorites(true)}>
+            ♡ {favorites.length}
+          </button>
+
+          <button className="nav-icon-btn" onClick={() => setShowCart(true)}>
+            Bag ({totalItems})
+          </button>
+
+          <button
+            className="language-toggle clean-language-btn"
+            onClick={() => setLanguage(isArabic ? "en" : "ar")}
+          >
+            {isArabic ? "EN" : "AR"}
+          </button>
+        </div>
+      </div>
+
+      {page === "home" ? (
+        <>
+          <section className="hero-video-section">
+            <video className="hero-video" autoPlay muted loop playsInline>
+              <source src={heroVideo} type="video/mp4" />
+            </video>
+
+            <div className="hero-overlay"></div>
+
+            <div className="hero-content">
+              <p className="hero-badge">{t[language].heroBadge}</p>
+              <h1>{t[language].heroTitle}</h1>
+              <p className="hero-description">{t[language].heroDescription}</p>
+
+              <button className="hero-shop-btn" onClick={handleShopNow}>
+                {t[language].shopNow}
+              </button>
+            </div>
+          </section>
+
+          <section className="home-product-strip">
+            <div className="home-strip-header">
+              <p className="section-tag">NEW ARRIVALS</p>
+              <h2>Fresh beauty picks</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>View all products</button>
+            </div>
+
+            <div className="home-products-row">
+              {latestProducts.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <section className="who-we-are-section">
+            <div className="who-we-are-container">
+              <div className="who-we-are-text">
+                <p className="section-tag">{t[language].whoTag}</p>
+                <h2>{t[language].whoTitle}</h2>
+                <p className="who-we-are-description">{t[language].whoP1}</p>
+                <p className="who-we-are-description">{t[language].whoP2}</p>
+              </div>
+
+              <div className="who-we-are-logo-box">
+                <img src={eloriaLogo} alt="ELORIA logo" className="who-we-are-logo" />
+                <p className="who-we-are-year">{t[language].founded}</p>
+              </div>
+            </div>
+          </section>
+
+          <section className="home-product-strip home-product-strip-alt">
+            <div className="home-strip-header">
+              <p className="section-tag">SOFT BEAUTY PICKS</p>
+              <h2>Made for your everyday glow</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>Shop collection</button>
+            </div>
+
+            <div className="home-products-row">
+              {softBeautyPicks.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <section className="instagram-section">
+            <div className="instagram-box">
+              <p className="section-tag">{t[language].connectTag}</p>
+              <h2>{t[language].instagramTitle}</h2>
+              <p>{t[language].instagramText}</p>
+
+              <a
+                href="https://instagram.com/theeloriaglow"
+                target="_blank"
+                rel="noreferrer"
+                className="instagram-link-btn"
+              >
+                @theeloriaglow
+              </a>
+            </div>
+          </section>
+
+          <section className="home-product-strip">
+            <div className="home-strip-header">
+              <p className="section-tag">YOU MAY ALSO LOVE</p>
+              <h2>A few more ELORIA favorites</h2>
+              <button className="view-all-btn" onClick={handleShopNow}>Continue shopping</button>
+            </div>
+
+            <div className="home-products-row">
+              {finalHomeProducts.map((product) => renderStoreProductCard(product))}
+            </div>
+          </section>
+
+          <div className="final-brand-message">
+            <h3>{t[language].finalTitle}</h3>
+            <p>{t[language].finalText}</p>
+          </div>
+        </>
+      ) : page === "product" && selectedProduct ? (
+        renderProductDetails()
+      ) : (
+        <main className="shop-page">
+          <section className="shop-hero">
+            <p className="section-tag">SHOP ELORIA</p>
+            <h1>Explore the full collection</h1>
+            <p>
+              Browse all products, search by name, or choose a category from the top menu.
+            </p>
+          </section>
+
+          <div className="search-box shop-search-box">
+            <input
+              type="text"
+              placeholder={t[language].searchPlaceholder}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+
+          <div className="sort-box">
+            <select
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value)}
+            >
+              <option value="default">{t[language].sortDefault}</option>
+              <option value="low-to-high">{t[language].lowToHigh}</option>
+              <option value="high-to-low">{t[language].highToLow}</option>
+            </select>
+          </div>
+
+          <div className="clear-filters-box">
+            <button
+              className="clear-filters-btn"
+              onClick={() => {
+                clearFilters();
+                setPage("shop");
+              }}
+            >
+              {t[language].clearFilters}
+            </button>
+          </div>
+
+          <div id="products-section" className="shop-products-anchor">
+            <p className="products-count">
+              {isArabic
+                ? `عرض ${filteredProducts.length} منتجات`
+                : `Showing ${filteredProducts.length} products`}
+            </p>
+          </div>
+
+          <div className="products-container">
+            {loading ? (
+              <div className="loader"></div>
+            ) : filteredProducts.length > 0 ? (
+              filteredProducts.map((product) => renderStoreProductCard(product))
+            ) : (
+              <p className="no-products-message">{t[language].noProducts}</p>
+            )}
+          </div>
+        </main>
+      )}
+      {showFavorites && (
+        <div className="favorites-overlay" onClick={() => setShowFavorites(false)}>
+          <div className="favorites-popup" onClick={(e) => e.stopPropagation()}>
+            <div className="favorites-popup-header">
+              <h2>{t[language].favorites}</h2>
+              <button
+                className="close-cart-btn"
+                onClick={() => setShowFavorites(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            {favorites.length === 0 ? (
+              <div className="favorites-empty">
+                <h3>No favorites yet</h3>
+                <p>Save the products you love and come back to them anytime.</p>
+              </div>
+            ) : (
+              <div className="favorites-grid">
+                {favorites.map((item) => (
+                  <div key={item.id} className="favorite-product-card">
+                    <img
+                      src={getImageUrl(item.image_url)}
+                      alt={item.name}
+                      className="favorite-product-image"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultProductImage;
+                      }}
+                    />
+
+                    <h4>{item.name}</h4>
+                    <p className="favorite-price">{item.price} ₪</p>
+
+                    <div className="favorite-actions">
+                      <button
+                        className="confirm-btn"
+                        onClick={() => {
+                          addToCart(item);
+                          setShowFavorites(false);
+                        }}
+                      >
+                        Add to Cart
+                      </button>
+
+                      <button
+                        className="cart-remove-btn"
+                        onClick={() => toggleFavorite(item)}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {showCart && (
+        <div className="cart-overlay premium-cart-overlay" onClick={() => setShowCart(false)}>
+          <aside className="cart-popup premium-cart-drawer" onClick={(e) => e.stopPropagation()}>
+            <div className="cart-popup-header premium-cart-header">
+              <div>
+                <p className="cart-mini-label">Your ELORIA bag</p>
+                <h2>{t[language].cart}</h2>
+              </div>
+
+              <button
+                className="close-cart-btn premium-close-btn"
+                onClick={() => setShowCart(false)}
+                aria-label="Close cart"
+              >
+                ✕
+              </button>
+            </div>
+
+            {cart.length === 0 ? (
+              <div className="premium-empty-cart">
+                <div className="empty-cart-icon">♡</div>
+                <h3>Your bag is empty</h3>
+                <p>Add your favorite ELORIA picks and come back here to complete your order.</p>
+                <button
+                  className="confirm-btn"
+                  onClick={() => {
+                    setShowCart(false);
+                    handleShopNow();
+                  }}
+                >
+                  Start Shopping
+                </button>
+              </div>
+            ) : (
+              <>
+                <div className="cart-popup-items premium-cart-items">
+                  {cart.map((item) => (
+                    <div key={item.id} className="cart-item-card premium-cart-item">
+                      <img
+                        src={getImageUrl(item.image_url)}
+                        alt={item.name}
+                        className="cart-item-image"
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProductImage;
+                        }}
+                      />
+
+                      <div className="cart-item-info">
+                        <div className="cart-item-top">
+                          <div>
+                            <h4>{getDisplayProductName(item.name)}</h4>
+                            {getShadeName(item.name) && (
+                              <p className="cart-item-shade">{getShadeName(item.name)}</p>
+                            )}
+                          </div>
+
+                          <button
+                            className="cart-item-remove-x"
+                            onClick={() => removeFromCart(item.id)}
+                            aria-label="Remove item"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        <div className="cart-item-bottom">
+                          <div className="quantity-controls premium-quantity-controls">
+                            <button
+                              className="qty-btn"
+                              onClick={() => decreaseQuantity(item.id)}
+                              aria-label="Decrease quantity"
+                            >
+                              −
+                            </button>
+
+                            <span className="cart-quantity-number">{item.quantity}</span>
+
+                            <button
+                              className="qty-btn"
+                              onClick={() => increaseQuantity(item.id)}
+                              aria-label="Increase quantity"
+                            >
+                              +
+                            </button>
+                          </div>
+
+                          <strong className="cart-line-total">
+                            {(Number(item.price) * item.quantity).toFixed(2)} ₪
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="premium-cart-footer">
+                  <div className="cart-total-line">
+                    <span>Items</span>
+                    <strong>{totalItems}</strong>
+                  </div>
+
+                  <div className="cart-total-line cart-grand-total">
+                    <span>Total</span>
+                    <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
+                  </div>
+
+                  <p className="cart-delivery-note">Payment is collected on delivery.</p>
+
+                  <button
+                    className="confirm-btn premium-checkout-btn"
+                    onClick={() => {
+                      setShowCheckout(true);
+                      setShowCart(false);
+                    }}
+                  >
+                    Continue to Checkout
+                  </button>
+                </div>
+              </>
+            )}
+          </aside>
         </div>
       )}
 
@@ -2650,6 +3378,6 @@ const stopDrag = () => {
       </footer>
     </div>
   );
-}
+
 
 export default App;
