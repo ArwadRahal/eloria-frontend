@@ -49,35 +49,22 @@ const [language, setLanguage] = useState("en");
   const [newCategoryName, setNewCategoryName] = useState("");
 
 const isArabic = language === "ar";
-const getImageUrl = (url, width = 900) => {
+const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
 
   if (url.startsWith("blob:") || url.startsWith("data:")) {
     return url;
   }
 
-  let finalUrl = url;
-
-  if (finalUrl.startsWith("http://")) {
-    finalUrl = finalUrl.replace("http://", "https://");
+  if (url.startsWith("http://")) {
+    return url.replace("http://", "https://");
   }
 
-  if (finalUrl.startsWith("/uploads/")) {
-    return `${API_URL}${finalUrl}`;
+  if (url.startsWith("/uploads/")) {
+    return `${API_URL}${url}`;
   }
 
-  if (
-    finalUrl.includes("res.cloudinary.com") &&
-    finalUrl.includes("/image/upload/") &&
-    !finalUrl.includes("/f_auto,")
-  ) {
-    return finalUrl.replace(
-      "/image/upload/",
-      `/image/upload/f_auto,q_auto,w_${width}/`
-    );
-  }
-
-  return finalUrl;
+  return url;
 };
 
 const getProductImages = (product) => {
