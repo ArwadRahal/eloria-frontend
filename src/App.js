@@ -1657,7 +1657,7 @@ setPreviewImages({
               )}
 
               <img
-                src={getImageUrl(selectedImage || galleryImages[0], 1000)}
+               src={getImageUrl(galleryImages[safeImageIndex], 1000)}
                 alt={selectedProduct.name}
                 className="product-details-main-image"
                 onError={(e) => {
@@ -1688,7 +1688,7 @@ setPreviewImages({
                 <button
                   key={index}
                   className={`product-details-thumb-btn ${
-                    selectedImage === image ? "active-detail-thumb" : ""
+                   galleryImages[safeImageIndex] === image ? "active-detail-thumb" : ""
                   }`}
                   onClick={() => setSelectedImage(image)}
                 >
