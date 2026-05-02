@@ -21,6 +21,7 @@ function App() {
   const [sortOrder, setSortOrder] = useState("default");
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedImage, setSelectedImage] = useState(defaultProductImage);
+  const [hoveredVariantByProductId, setHoveredVariantByProductId] = useState({});
   const [adminStatusFilter, setAdminStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
 
@@ -48,22 +49,35 @@ const [language, setLanguage] = useState("en");
   const [newCategoryName, setNewCategoryName] = useState("");
 
 const isArabic = language === "ar";
-const getImageUrl = (url) => {
+const getImageUrl = (url, width = 900) => {
   if (!url) return defaultProductImage;
 
   if (url.startsWith("blob:") || url.startsWith("data:")) {
     return url;
   }
 
-  if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
+  let finalUrl = url;
+
+  if (finalUrl.startsWith("http://")) {
+    finalUrl = finalUrl.replace("http://", "https://");
   }
 
-  if (url.startsWith("/uploads/")) {
-    return `${API_URL}${url}`;
+  if (finalUrl.startsWith("/uploads/")) {
+    return `${API_URL}${finalUrl}`;
   }
 
-  return url;
+  if (
+    finalUrl.includes("res.cloudinary.com") &&
+    finalUrl.includes("/image/upload/") &&
+    !finalUrl.includes("/f_auto,")
+  ) {
+    return finalUrl.replace(
+      "/image/upload/",
+      `/image/upload/f_auto,q_auto,w_${width}/`
+    );
+  }
+
+  return finalUrl;
 };
 
 const getProductImages = (product) => {
@@ -113,6 +127,23 @@ const getAllProductVariants = (product) => {
   const variants = [product, ...getProductVariants(product)];
 
   return variants.sort((a, b) => a.name.localeCompare(b.name));
+};
+
+const getProductGroupKey = (product) => {
+  return `${product?.category_id || ""}-${getBaseProductName(product?.name || "")}`;
+};
+
+const getRepresentativeProducts = (items = []) => {
+  const seenGroups = new Set();
+
+  return items.filter((product) => {
+    const groupKey = getProductGroupKey(product);
+
+    if (seenGroups.has(groupKey)) return false;
+
+    seenGroups.add(groupKey);
+    return true;
+  });
 };
 
 const [previewImages, setPreviewImages] = useState({
@@ -715,13 +746,20 @@ setPreviewImages({
       return;
     }
 
+    const normalizedPhone = customerInfo.phone.replace(/\D/g, "");
+
     if (
-      !customerInfo.fullName ||
-      !customerInfo.phone ||
-      !customerInfo.city ||
-      !customerInfo.address
+      !customerInfo.fullName.trim() ||
+      !customerInfo.phone.trim() ||
+      !customerInfo.city.trim() ||
+      !customerInfo.address.trim()
     ) {
       showToastMessage("Please fill in all required fields.", "error");
+      return;
+    }
+
+    if (normalizedPhone.length < 7) {
+      showToastMessage("Please enter a valid phone number.", "error");
       return;
     }
 
@@ -903,7 +941,9 @@ setPreviewImages({
     return order.status === adminStatusFilter;
   });
 
-  const filteredProducts = products
+  const uniqueProducts = useMemo(() => getRepresentativeProducts(products), [products]);
+
+  const filteredProducts = uniqueProducts
     .filter((product) => {
       const matchesSearch = product.name
         .toLowerCase()
@@ -925,15 +965,15 @@ setPreviewImages({
       return 0;
     });
 
-  const latestProducts = useMemo(() => products.slice(0, 4), [products]);
+  const latestProducts = useMemo(() => uniqueProducts.slice(0, 4), [uniqueProducts]);
   const softBeautyPicks = useMemo(() => {
-    const picks = products.slice(4, 8);
-    return picks.length > 0 ? picks : products.slice(0, 4);
-  }, [products]);
+    const picks = uniqueProducts.slice(4, 8);
+    return picks.length > 0 ? picks : uniqueProducts.slice(0, 4);
+  }, [uniqueProducts]);
   const finalHomeProducts = useMemo(() => {
-    const picks = products.slice(8, 12);
-    return picks.length > 0 ? picks : products.slice(0, 4);
-  }, [products]);
+    const picks = uniqueProducts.slice(8, 12);
+    return picks.length > 0 ? picks : uniqueProducts.slice(0, 4);
+  }, [uniqueProducts]);
 
   const filteredAdminProducts = products.filter((product) => {
     const matchesSearch = product.name
@@ -1213,6 +1253,7 @@ setPreviewImages({
                           src={getImageUrl(product.image_url)}
                           alt={product.name}
                           className="admin-table-image"
+                          loading="lazy"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src = defaultProductImage;
@@ -1414,103 +1455,136 @@ setPreviewImages({
   );
 };
 
-  const renderStoreProductCard = (product) => (
-    <div
-      key={product.id}
-      className="product-card"
-      onClick={() => {
-        setSelectedProduct(product);
-        setSelectedImage(getProductImages(product)[0]);
-        setPage("product");
-        setTimeout(() => {
-          window.scrollTo({ top: 0, behavior: "smooth" });
-        }, 50);
-      }}
-    >
-      <button
-        className={`favorite-btn ${
-          isFavorite(product.id) ? "active-favorite" : ""
-        }`}
-        onClick={(e) => {
-          e.stopPropagation();
-          toggleFavorite(product);
+  const renderStoreProductCard = (product) => {
+    const variantProducts = getAllProductVariants(product);
+    const hoveredVariantId = hoveredVariantByProductId[product.id];
+    const previewProduct =
+      variantProducts.find(
+        (variant) => String(variant.id) === String(hoveredVariantId)
+      ) || product;
+
+    return (
+      <div
+        key={product.id}
+        className="product-card"
+        onMouseLeave={() => {
+          setHoveredVariantByProductId((prev) => ({
+            ...prev,
+            [product.id]: null
+          }));
+        }}
+        onClick={() => {
+          setSelectedProduct(previewProduct);
+          setSelectedImage(getProductImages(previewProduct)[0]);
+          setPage("product");
+          setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: "smooth" });
+          }, 50);
         }}
       >
-        {isFavorite(product.id) ? "❤" : "♡"}
-      </button>
-
-      <div className="product-image-wrap">
-        <img
-          src={getImageUrl(product.image_url)}
-          alt={product.name}
-          className="product-image"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = defaultProductImage;
-          }}
-        />
-      </div>
-
-      <div className="product-card-body">
-        <h3>{getDisplayProductName(product.name)}</h3>
-
-        {getAllProductVariants(product).length > 1 && (
-          <div className="product-variants-preview">
-            <div className="variant-dots">
-              {getAllProductVariants(product).slice(0, 5).map((variant) => (
-                <button
-                  key={variant.id}
-                  className={`variant-dot ${
-                    variant.id === product.id ? "active-variant-dot" : ""
-                  }`}
-                  title={getShadeName(variant.name) || variant.name}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedProduct(variant);
-                    setSelectedImage(getProductImages(variant)[0]);
-                    setPage("product");
-                    setTimeout(() => {
-                      window.scrollTo({ top: 0, behavior: "smooth" });
-                    }, 50);
-                  }}
-                >
-                  <img
-                    src={getImageUrl(variant.image_url)}
-                    alt={variant.name}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = defaultProductImage;
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-
-            <span className="variants-count">
-              Available in {getAllProductVariants(product).length} shades
-            </span>
-          </div>
-        )}
-
-        <p className="product-price">{product.price} ₪</p>
-
-        {product.stock === 0 && (
-      <span className="product-out-badge">{t[language].outOfStock}</span>
-        )}
-
         <button
-          className="add-cart-btn"
+          className={`favorite-btn ${
+            isFavorite(previewProduct.id) ? "active-favorite" : ""
+          }`}
           onClick={(e) => {
             e.stopPropagation();
-            addToCart(product);
+            toggleFavorite(previewProduct);
           }}
-          disabled={product.stock === 0}
         >
-       {product.stock === 0 ? t[language].outOfStock : t[language].addToCart}
+          {isFavorite(previewProduct.id) ? "❤" : "♡"}
         </button>
+
+        <div className="product-image-wrap">
+          <img
+            src={getImageUrl(previewProduct.image_url, 700)}
+            alt={previewProduct.name}
+            className="product-image"
+            loading="lazy"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultProductImage;
+            }}
+          />
+        </div>
+
+        <div className="product-card-body">
+          <h3>{getDisplayProductName(product.name)}</h3>
+
+          {variantProducts.length > 1 && (
+            <div className="product-variants-preview">
+              <div className="variant-dots">
+                {variantProducts.slice(0, 6).map((variant) => (
+                  <button
+                    key={variant.id}
+                    className={`variant-dot ${
+                      variant.id === previewProduct.id ? "active-variant-dot" : ""
+                    }`}
+                    title={getShadeName(variant.name) || variant.name}
+                    onMouseEnter={() => {
+                      setHoveredVariantByProductId((prev) => ({
+                        ...prev,
+                        [product.id]: variant.id
+                      }));
+                    }}
+                    onFocus={() => {
+                      setHoveredVariantByProductId((prev) => ({
+                        ...prev,
+                        [product.id]: variant.id
+                      }));
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedProduct(variant);
+                      setSelectedImage(getProductImages(variant)[0]);
+                      setPage("product");
+                      setTimeout(() => {
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }, 50);
+                    }}
+                  >
+                    <img
+                      src={getImageUrl(variant.image_url, 120)}
+                      alt={variant.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = defaultProductImage;
+                      }}
+                    />
+                  </button>
+                ))}
+              </div>
+
+              <span className="variants-count">
+                {variantProducts.length} shades available
+              </span>
+            </div>
+          )}
+
+          {getShadeName(previewProduct.name) && (
+            <p className="card-shade-name">{getShadeName(previewProduct.name)}</p>
+          )}
+
+          <p className="product-price">{previewProduct.price} ₪</p>
+
+          {previewProduct.stock === 0 && (
+            <span className="product-out-badge">{t[language].outOfStock}</span>
+          )}
+
+          <button
+            className="add-cart-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              addToCart(previewProduct);
+            }}
+            disabled={previewProduct.stock === 0}
+          >
+            {previewProduct.stock === 0 ? t[language].outOfStock : t[language].addToCart}
+          </button>
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
 
   const renderProductDetails = () => {
@@ -1532,16 +1606,23 @@ setPreviewImages({
       setSelectedImage(galleryImages[nextIndex]);
     };
 
-    const relatedProducts = products
+    const selectedBaseName = getBaseProductName(selectedProduct.name);
+
+    const relatedProducts = uniqueProducts
       .filter(
         (product) =>
           product.id !== selectedProduct.id &&
-          String(product.category_id) === String(selectedProduct.category_id)
+          String(product.category_id) === String(selectedProduct.category_id) &&
+          getBaseProductName(product.name) !== selectedBaseName
       )
       .slice(0, 4);
 
-    const fallbackRelatedProducts = products
-      .filter((product) => product.id !== selectedProduct.id)
+    const fallbackRelatedProducts = uniqueProducts
+      .filter(
+        (product) =>
+          product.id !== selectedProduct.id &&
+          getBaseProductName(product.name) !== selectedBaseName
+      )
       .slice(0, 4);
 
     const productsToShow =
@@ -1576,7 +1657,7 @@ setPreviewImages({
               )}
 
               <img
-                src={getImageUrl(selectedImage || galleryImages[0])}
+                src={getImageUrl(selectedImage || galleryImages[0], 1000)}
                 alt={selectedProduct.name}
                 className="product-details-main-image"
                 onError={(e) => {
@@ -1612,7 +1693,7 @@ setPreviewImages({
                   onClick={() => setSelectedImage(image)}
                 >
                   <img
-                    src={getImageUrl(image)}
+                    src={getImageUrl(image, 160)}
                     alt={`${selectedProduct.name} ${index + 1}`}
                     onError={(e) => {
                       e.target.onerror = null;
@@ -1651,7 +1732,7 @@ setPreviewImages({
                       }}
                     >
                       <img
-                        src={getImageUrl(variant.image_url)}
+                        src={getImageUrl(variant.image_url, 120)}
                         alt={variant.name}
                         onError={(e) => {
                           e.target.onerror = null;
@@ -1732,6 +1813,14 @@ setPreviewImages({
     );
   };
 
+
+  const normalizedCheckoutPhone = customerInfo.phone.replace(/\D/g, "");
+  const isCheckoutValid =
+    cart.length > 0 &&
+    customerInfo.fullName.trim() &&
+    normalizedCheckoutPhone.length >= 7 &&
+    customerInfo.city.trim() &&
+    customerInfo.address.trim();
 
   if (isAdmin) {
     return (
@@ -2270,6 +2359,7 @@ const stopDrag = () => {
                       src={getImageUrl(item.image_url)}
                       alt={item.name}
                       className="favorite-product-image"
+                      loading="lazy"
                       onError={(e) => {
                         e.target.onerror = null;
                         e.target.src = defaultProductImage;
@@ -2381,9 +2471,13 @@ const stopDrag = () => {
           className="checkout-overlay"
           onClick={() => setShowCheckout(false)}
         >
-          <div className="checkout-popup" onClick={(e) => e.stopPropagation()}>
+          <div className="checkout-popup premium-checkout-popup" onClick={(e) => e.stopPropagation()}>
             <div className="checkout-popup-header">
-             <h2>{t[language].checkout}</h2>
+              <div>
+                <p className="checkout-step-label">Secure order details</p>
+                <h2>{t[language].checkout}</h2>
+              </div>
+
               <button
                 className="close-product-btn"
                 onClick={() => setShowCheckout(false)}
@@ -2392,46 +2486,94 @@ const stopDrag = () => {
               </button>
             </div>
 
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Full Name"
-              value={customerInfo.fullName}
-              onChange={handleInputChange}
-            />
+            <div className="checkout-layout-grid">
+              <div className="checkout-form-fields">
+                <label>Full Name *</label>
+                <input
+                  type="text"
+                  name="fullName"
+                  placeholder="Full Name"
+                  value={customerInfo.fullName}
+                  onChange={handleInputChange}
+                />
 
-            <input
-              type="text"
-              name="phone"
-              placeholder="Phone Number"
-              value={customerInfo.phone}
-              onChange={handleInputChange}
-            />
+                <label>Phone Number *</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  placeholder="Phone Number"
+                  value={customerInfo.phone}
+                  onChange={handleInputChange}
+                />
 
-            <input
-              type="text"
-              name="city"
-              placeholder="City"
-              value={customerInfo.city}
-              onChange={handleInputChange}
-            />
+                <label>City *</label>
+                <input
+                  type="text"
+                  name="city"
+                  placeholder="City"
+                  value={customerInfo.city}
+                  onChange={handleInputChange}
+                />
 
-            <input
-              type="text"
-              name="address"
-              placeholder="Address"
-              value={customerInfo.address}
-              onChange={handleInputChange}
-            />
+                <label>Address *</label>
+                <input
+                  type="text"
+                  name="address"
+                  placeholder="Address"
+                  value={customerInfo.address}
+                  onChange={handleInputChange}
+                />
 
-            <textarea
-              name="notes"
-              placeholder="Notes"
-              value={customerInfo.notes}
-              onChange={handleInputChange}
-            ></textarea>
+                <label>Notes</label>
+                <textarea
+                  name="notes"
+                  placeholder="Notes"
+                  value={customerInfo.notes}
+                  onChange={handleInputChange}
+                ></textarea>
+              </div>
 
-            <button className="submit-order-btn" onClick={handlePlaceOrder}>
+              <div className="checkout-summary-card">
+                <h3>Order Summary</h3>
+
+                <div className="checkout-summary-items">
+                  {cart.map((item) => (
+                    <div key={item.id} className="checkout-summary-item">
+                      <img
+                        src={getImageUrl(item.image_url, 120)}
+                        alt={item.name}
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = defaultProductImage;
+                        }}
+                      />
+
+                      <div>
+                        <strong>{getDisplayProductName(item.name)}</strong>
+                        {getShadeName(item.name) && <span>{getShadeName(item.name)}</span>}
+                        <p>Qty: {item.quantity} · {item.price} ₪</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="checkout-total-row">
+                  <span>Total</span>
+                  <strong>{totalPrice} ₪</strong>
+                </div>
+
+                <p className="checkout-payment-note">
+                  Payment method: cash on delivery.
+                </p>
+              </div>
+            </div>
+
+            <button
+              className="submit-order-btn premium-submit-order-btn"
+              onClick={handlePlaceOrder}
+              disabled={!isCheckoutValid}
+            >
               Place Order
             </button>
           </div>
