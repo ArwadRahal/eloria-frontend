@@ -24,6 +24,7 @@ function App() {
   const [hoveredVariantByProductId, setHoveredVariantByProductId] = useState({});
   const [adminStatusFilter, setAdminStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
+  const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
 
   const [adminView, setAdminView] = useState("dashboard");
   const [showEditPopup, setShowEditPopup] = useState(false);
@@ -49,6 +50,8 @@ const [language, setLanguage] = useState("en");
   const [newCategoryName, setNewCategoryName] = useState("");
 
 const isArabic = language === "ar";
+const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
+const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
 const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
 
@@ -269,12 +272,27 @@ const t = {
 
   const fetchCategories = async () => {
     try {
+      const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+
+      if (cachedCategories && categories.length === 0) {
+        setCategories(JSON.parse(cachedCategories));
+      }
+
       const res = await fetch(`${API_URL}/categories`);
       const data = await res.json();
-      setCategories(Array.isArray(data) ? data : []);
+      const safeCategories = Array.isArray(data) ? data : [];
+
+      setCategories(safeCategories);
+      sessionStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(safeCategories));
     } catch (err) {
       console.log(err);
-      setCategories([]);
+
+      const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+      if (cachedCategories) {
+        setCategories(JSON.parse(cachedCategories));
+      } else {
+        setCategories([]);
+      }
     }
   };
 
@@ -355,13 +373,30 @@ const t = {
 
   const fetchProducts = async () => {
     try {
-      setLoading(true);
+      const cachedProducts = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+
+      if (cachedProducts && products.length === 0) {
+        setProducts(JSON.parse(cachedProducts));
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
       const res = await fetch(`${API_URL}/products`);
       const data = await res.json();
-      setProducts(Array.isArray(data) ? data : []);
+      const safeProducts = Array.isArray(data) ? data : [];
+
+      setProducts(safeProducts);
+      sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(safeProducts));
     } catch (err) {
       console.log(err);
-      setProducts([]);
+
+      const cachedProducts = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+      if (cachedProducts) {
+        setProducts(JSON.parse(cachedProducts));
+      } else {
+        setProducts([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -380,9 +415,14 @@ const t = {
 
   useEffect(() => {
     fetchProducts();
-    fetchOrders();
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    if (isAdmin) {
+      fetchOrders();
+    }
+  }, [isAdmin]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -405,6 +445,26 @@ const t = {
       setFavorites(JSON.parse(savedFavorites));
     }
   }, []);
+
+  useEffect(() => {
+    if (products.length === 0) return;
+
+    products.slice(0, 18).forEach((product) => {
+      getProductImages(product).forEach((src) => {
+        const img = new Image();
+        img.src = src;
+      });
+    });
+  }, [products]);
+
+  useEffect(() => {
+    if (!selectedProduct) return;
+
+    getProductImages(selectedProduct).forEach((src) => {
+      const img = new Image();
+      img.src = src;
+    });
+  }, [selectedProduct]);
 
   const showToastMessage = (message, type = "success") => {
     setToast({
@@ -728,6 +788,8 @@ setPreviewImages({
   };
 
   const handlePlaceOrder = async () => {
+    if (isSubmittingOrder) return;
+
     if (cart.length === 0) {
       showToastMessage("Your cart is empty.", "error");
       return;
@@ -751,6 +813,8 @@ setPreviewImages({
     }
 
     try {
+      setIsSubmittingOrder(true);
+
       const response = await fetch(`${API_URL}/orders`, {
         method: "POST",
          headers: {
@@ -788,6 +852,8 @@ setPreviewImages({
         "Something went wrong while sending the order.",
         "error"
       );
+    } finally {
+      setIsSubmittingOrder(false);
     }
   };
 
@@ -1487,6 +1553,7 @@ setPreviewImages({
             alt={previewProduct.name}
             className="product-image"
             loading="lazy"
+            decoding="async"
             onError={(e) => {
               e.target.onerror = null;
               e.target.src = defaultProductImage;
@@ -1647,6 +1714,9 @@ setPreviewImages({
                src={getImageUrl(galleryImages[safeImageIndex], 1000)}
                 alt={selectedProduct.name}
                 className="product-details-main-image"
+                loading="eager"
+                decoding="async"
+                fetchPriority="high"
                 onError={(e) => {
                   e.target.onerror = null;
                   e.target.src = defaultProductImage;
@@ -2559,9 +2629,9 @@ const stopDrag = () => {
             <button
               className="submit-order-btn premium-submit-order-btn"
               onClick={handlePlaceOrder}
-              disabled={!isCheckoutValid}
+              disabled={!isCheckoutValid || isSubmittingOrder}
             >
-              Place Order
+              {isSubmittingOrder ? "Sending..." : "Place Order"}
             </button>
           </div>
         </div>

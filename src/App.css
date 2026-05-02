@@ -5182,3 +5182,112 @@ html {
     justify-content: flex-start;
   }
 }
+
+
+/* =========================================
+   ELORIA PERFORMANCE + IMAGE EXPERIENCE FINAL
+   ========================================= */
+
+.product-image-wrap,
+.product-details-main-image-box,
+.favorite-product-image,
+.checkout-summary-item img,
+.admin-table-image,
+.preview-images img {
+  background:
+    linear-gradient(90deg, #fff7fb 25%, #ffeaf2 37%, #fff7fb 63%);
+  background-size: 400% 100%;
+  animation: eloriaImageSkeleton 1.4s ease infinite;
+}
+
+.product-image,
+.product-details-main-image,
+.product-details-thumb-btn img,
+.variant-dot img,
+.details-variant-btn img,
+.favorite-product-image,
+.checkout-summary-item img,
+.admin-table-image,
+.preview-images img {
+  content-visibility: auto;
+}
+
+.product-image,
+.product-details-main-image {
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+@keyframes eloriaImageSkeleton {
+  0% {
+    background-position: 100% 0;
+  }
+
+  100% {
+    background-position: 0 0;
+  }
+}
+
+/* Final protection: product detail images must never crop */
+.product-details-main-image-box {
+  height: 470px !important;
+  min-height: 470px !important;
+  padding: 24px !important;
+  overflow: hidden !important;
+  background: #ffffff !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.product-details-main-image {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  padding: 0 !important;
+  background: transparent !important;
+  border-radius: 22px !important;
+}
+
+.product-details-main-image-box:hover .product-details-main-image {
+  transform: none !important;
+}
+
+.product-details-thumb-btn img {
+  object-fit: contain !important;
+  background: #ffffff !important;
+}
+
+/* Faster-feeling buttons */
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed !important;
+}
+
+.premium-submit-order-btn:disabled {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* Reduce expensive movement for users/devices that prefer less motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .product-details-main-image-box {
+    height: 330px !important;
+    min-height: 330px !important;
+    padding: 16px !important;
+  }
+}
