@@ -3,12 +3,30 @@ import "./App.css";
 import defaultProductImage from "./images/default-product.png";
 import heroVideo from "./videos/hero-video.mp4";
 import eloriaLogo from "./images/eloria-logo.png";
+import ProductCard from "./components/ProductCard";
+import ProductDetails from "./components/ProductDetails";
+import CartDrawer from "./components/CartDrawer";
+import CheckoutPopup from "./components/CheckoutPopup";
+import OrderSuccessPopup from "./components/OrderSuccessPopup";
+import FavoritesPopup from "./components/FavoritesPopup";
+import Navbar from "./components/Navbar";
+import AdminSidebar from "./components/admin/AdminSidebar";
+import AdminDashboardCards from "./components/admin/AdminDashboard.jsx";
+import AdminOrders from "./components/admin/AdminOrders";
+import AdminProducts from "./components/admin/AdminProducts";
+import AdminCategories from "./components/admin/AdminCategories";
+import AddProductForm from "./components/admin/AddProductForm";
+import EditProductPopup from "./components/admin/EditProductPopup";
+
 
 function App() {
   const API_URL =
     process.env.REACT_APP_API_URL || "https://eloria-backend.onrender.com";
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
+  const navIsDraggingRef = useRef(false);
+  const navStartXRef = useRef(0);
+  const navScrollLeftRef = useRef(0);
 
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
@@ -1095,825 +1113,51 @@ setPreviewImages({
     (product) => product.stock === 0
   ).length;
 
-  const renderAdminDashboardCards = () => {
-    return (
-      <div className="admin-home-grid">
-        <div className="admin-home-card">
-          <h3>{totalOrders}</h3>
-          <p>Total Orders</p>
-        </div>
-        <div className="admin-home-card">
-          <h3>{pendingOrders}</h3>
-          <p>Pending Orders</p>
-        </div>
-        <div className="admin-home-card">
-          <h3>{deliveredOrders}</h3>
-          <p>Delivered Orders</p>
-        </div>
-        <div className="admin-home-card">
-          <h3>{totalProductsCount}</h3>
-          <p>Total Products</p>
-        </div>
-        <div className="admin-home-card">
-          <h3>{lowStockProductsCount}</h3>
-          <p>Low Stock</p>
-        </div>
-        <div className="admin-home-card">
-          <h3>{outOfStockProductsCount}</h3>
-          <p>Out of Stock</p>
-        </div>
-      </div>
-    );
-  };
 
-  const renderAdminOrders = () => {
-    return (
-      <>
-        <div className="admin-filter-box">
-          <button
-            className={adminStatusFilter === "all" ? "active-admin-filter" : ""}
-            onClick={() => setAdminStatusFilter("all")}
-          >
-            All
-          </button>
-
-          <button
-            className={
-              adminStatusFilter === "pending" ? "active-admin-filter" : ""
-            }
-            onClick={() => setAdminStatusFilter("pending")}
-          >
-            Pending
-          </button>
-
-          <button
-            className={
-              adminStatusFilter === "delivered" ? "active-admin-filter" : ""
-            }
-            onClick={() => setAdminStatusFilter("delivered")}
-          >
-            Delivered
-          </button>
-
-          <button
-            className={
-              adminStatusFilter === "cancelled" ? "active-admin-filter" : ""
-            }
-            onClick={() => setAdminStatusFilter("cancelled")}
-          >
-            Cancelled
-          </button>
-        </div>
-
-        <div className="admin-orders-wrapper">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => (
-              <div
-                key={order.id}
-                className={`admin-order-card status-card-${order.status}`}
-              >
-                <h3>Order #{order.id}</h3>
-                <p>
-                  <strong>Created:</strong>{" "}
-                  {new Date(order.created_at).toLocaleString()}
-                </p>
-
-                <div className="customer-info-box">
-                  <p>
-                    <strong>Name:</strong> {order.customer_name}
-                  </p>
-
-                  <p>
-                    <strong>Phone:</strong> {order.phone}{" "}
-                    <button
-                      className="copy-btn"
-                      onClick={() => copyToClipboard(order.phone)}
-                    >
-                      Copy
-                    </button>
-                  </p>
-
-                  <p>
-                    <strong>City:</strong> {order.city}
-                  </p>
-
-                  <p>
-                    <strong>Address:</strong> {order.address}{" "}
-                    <button
-                      className="copy-btn"
-                      onClick={() => copyToClipboard(order.address)}
-                    >
-                      Copy
-                    </button>
-                  </p>
-
-                  <button
-                    className="copy-order-details-btn"
-                    onClick={() =>
-                      copyToClipboard(
-                        `${order.customer_name} - ${order.city} - ${order.address} - ${order.phone}`
-                      )
-                    }
-                  >
-                    Copy Full Delivery Info
-                  </button>
-                </div>
-
-                <p>
-                  <strong>Total:</strong> {order.total_price} ₪
-                </p>
-
-                <p>
-                  <strong>Status:</strong>{" "}
-                  <span className={`status-badge status-${order.status}`}>
-                    {order.status}
-                  </span>
-                </p>
-
-                <div style={{ marginTop: "10px" }}>
-                  <strong>Items:</strong>
-                  {order.items &&
-                    order.items.map((item) => (
-                      <div
-                        key={item.id}
-                        style={{ marginTop: "6px", paddingLeft: "10px" }}
-                      >
-                        <p style={{ margin: "4px 0" }}>
-                          - {item.product_name} | Qty: {item.quantity} | Price:{" "}
-                          {item.price} ₪
-                        </p>
-                      </div>
-                    ))}
-                </div>
-
-                <div className="admin-order-actions">
-                  <button
-                    onClick={() => deleteOrder(order.id)}
-                    style={{ background: "#fde8e8", color: "#d9534f" }}
-                  >
-                    Delete
-                  </button>
-
-                  <button
-                    onClick={() => updateOrderStatus(order.id, "delivered")}
-                  >
-                    Delivered
-                  </button>
-
-                  <button
-                    onClick={() => updateOrderStatus(order.id, "cancelled")}
-                  >
-                    Cancelled
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p className="no-admin-orders-message">
-              No orders in this category yet.
-            </p>
-          )}
-        </div>
-      </>
-    );
-  };
-
-  const renderAdminProducts = () => {
-    return (
-      <div className="admin-products-section">
-        <h3 className="admin-products-title">Manage Products</h3>
-
-        <div className="admin-products-tools">
-          <input
-            type="text"
-            placeholder="Search product..."
-            value={adminProductSearch}
-            onChange={(e) => setAdminProductSearch(e.target.value)}
-            className="admin-products-search"
-          />
-
-          <select
-            value={adminStockFilter}
-            onChange={(e) => setAdminStockFilter(e.target.value)}
-            className="admin-products-stock-filter"
-          >
-            <option value="all">All Stock</option>
-            <option value="available">Available</option>
-            <option value="low">Low Stock</option>
-            <option value="out">Out of Stock</option>
-          </select>
-        </div>
-
-        <div className="admin-products-mini-stats">
-          <div className="mini-stat-card">
-            <span>{totalProductsCount}</span>
-            <p>Total Products</p>
-          </div>
-
-          <div className="mini-stat-card">
-            <span>{lowStockProductsCount}</span>
-            <p>Low Stock</p>
-          </div>
-
-          <div className="mini-stat-card">
-            <span>{outOfStockProductsCount}</span>
-            <p>Out of Stock</p>
-          </div>
-        </div>
-
-        <div className="admin-products-table-wrapper">
-          <table className="admin-products-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Images</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {filteredAdminProducts.length > 0 ? (
-                filteredAdminProducts.map((product) => {
-                  const imageCount = [
-                    product.image_url,
-                    product.image_url_2,
-                    product.image_url_3
-                  ].filter(Boolean).length;
-
-                  return (
-                    <tr key={product.id}>
-                      <td>
-                        <img
-                          src={getImageUrl(product.image_url)}
-                          alt={product.name}
-                          className="admin-table-image"
-                          loading="lazy"
-                          onError={(e) => {
-                            e.target.onerror = null;
-                            e.target.src = defaultProductImage;
-                          }}
-                        />
-                      </td>
-
-                      <td className="product-name-cell">{product.name}</td>
-                      <td>{getCategoryName(product.category_id)}</td>
-                      <td>{product.price} ₪</td>
-
-                      <td>
-                        <span
-                          className={`stock-badge-admin ${
-                            product.stock === 0
-                              ? "stock-out"
-                              : product.stock <= 3
-                              ? "stock-low"
-                              : "stock-ok"
-                          }`}
-                        >
-                          {product.stock}
-                        </span>
-                      </td>
-
-                      <td>{imageCount}</td>
-
-                      <td>
-                        <div className="table-actions">
-                          <button
-                            className="edit-btn"
-                            onClick={() => handleEditProduct(product)}
-                          >
-                            Edit
-                          </button>
-
-                          <button
-                            className="delete-btn"
-                            onClick={() => deleteProduct(product.id)}
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
-              ) : (
-                <tr>
-                  <td colSpan="7" className="no-products-row">
-                    No matching products found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    );
-  };
-
- const renderAdminCategories = () => {
+ 
+const renderStoreProductCard = (product) => {
   return (
-    <div className="admin-form-page admin-categories-page">
-      <h3>Manage Categories</h3>
-
-      <div className="category-add-row">
-        <input
-          type="text"
-          placeholder="New category name"
-          value={newCategoryName}
-          onChange={(e) => setNewCategoryName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleAddCategory();
-            }
-          }}
-        />
-
-        <button className="submit-order-btn" onClick={handleAddCategory}>
-          Add Category
-        </button>
-      </div>
-
-      <p className="categories-note">
-        You can delete a category only if it has no products connected to it.
-      </p>
-
-      <div className="categories-list">
-        {categories.length > 0 ? (
-          categories.map((category) => {
-            const productCount = products.filter(
-              (product) => String(product.category_id) === String(category.id)
-            ).length;
-
-            return (
-              <div key={category.id} className="category-admin-card">
-                <div className="category-admin-info">
-                  <span className="category-admin-id">#{category.id}</span>
-                  <strong>{category.name}</strong>
-                  <small>{productCount} products</small>
-                </div>
-
-                <button
-                  className="delete-category-btn"
-                  onClick={() => handleDeleteCategory(category)}
-                  disabled={productCount > 0}
-                  title={
-                    productCount > 0
-                      ? "Move or delete products from this category first"
-                      : "Delete category"
-                  }
-                >
-                  Delete
-                </button>
-              </div>
-            );
-          })
-        ) : (
-          <p className="no-admin-orders-message">No categories found yet.</p>
-        )}
-      </div>
-    </div>
+    <ProductCard
+      key={product.id}
+      product={product}
+      products={products}
+      API_URL={API_URL}
+      hoveredVariantByProductId={hoveredVariantByProductId}
+      setHoveredVariantByProductId={setHoveredVariantByProductId}
+      isFavorite={isFavorite}
+      toggleFavorite={toggleFavorite}
+      addToCart={addToCart}
+      setSelectedProduct={setSelectedProduct}
+      setSelectedImage={setSelectedImage}
+      setPage={setPage}
+      t={t}
+      language={language}
+    />
   );
 };
 
- const renderAddProduct = () => {
+const renderProductDetails = () => {
   return (
-    <div className="add-product-form admin-form-page">
-      <h3>Add New Product</h3>
-
-      <input
-        type="text"
-        name="name"
-        placeholder="Product Name"
-        value={newProduct.name}
-        onChange={handleNewProductChange}
-      />
-
-      <input
-        type="number"
-        name="price"
-        placeholder="Price"
-        value={newProduct.price}
-        onChange={handleNewProductChange}
-      />
-
-      <input
-        type="number"
-        name="stock"
-        placeholder="Stock"
-        value={newProduct.stock}
-        onChange={handleNewProductChange}
-      />
-
-      <select
-        name="category_id"
-        value={newProduct.category_id}
-        onChange={handleNewProductChange}
-      >
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-
-      <label>Main Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleImagePreview(e, "image")}
-      />
-
-      <label>Second Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleImagePreview(e, "image2")}
-      />
-
-      <label>Third Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => handleImagePreview(e, "image3")}
-      />
-
-      <div className="preview-images">
-        {previewImages.image && <img src={previewImages.image} alt="preview 1" />}
-        {previewImages.image2 && <img src={previewImages.image2} alt="preview 2" />}
-        {previewImages.image3 && <img src={previewImages.image3} alt="preview 3" />}
-      </div>
-
-      <button className="submit-order-btn" onClick={handleAddProduct}>
-        Save Product
-      </button>
-    </div>
+    <ProductDetails
+      selectedProduct={selectedProduct}
+      selectedImage={selectedImage}
+      setSelectedProduct={setSelectedProduct}
+      setSelectedImage={setSelectedImage}
+      setPage={setPage}
+      uniqueProducts={uniqueProducts}
+      products={products}
+      API_URL={API_URL}
+      getCategoryName={getCategoryName}
+      addToCart={addToCart}
+      isFavorite={isFavorite}
+      toggleFavorite={toggleFavorite}
+      hoveredVariantByProductId={hoveredVariantByProductId}
+      setHoveredVariantByProductId={setHoveredVariantByProductId}
+      t={t}
+      language={language}
+    />
   );
 };
-
-  const renderStoreProductCard = (product) => {
-    const variantProducts = getAllProductVariants(product);
-    const hoveredVariantId = hoveredVariantByProductId[product.id];
-    const previewProduct =
-      variantProducts.find(
-        (variant) => String(variant.id) === String(hoveredVariantId)
-      ) || product;
-
-    return (
-      <div
-        key={product.id}
-        className="product-card"
-        onMouseLeave={() => {
-          setHoveredVariantByProductId((prev) => ({
-            ...prev,
-            [product.id]: null
-          }));
-        }}
-        onClick={() => {
-          setSelectedProduct(previewProduct);
-          setSelectedImage(getProductImages(previewProduct)[0]);
-          setPage("product");
-          setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-          }, 50);
-        }}
-      >
-        <button
-          className={`favorite-btn ${
-            isFavorite(previewProduct.id) ? "active-favorite" : ""
-          }`}
-          onClick={(e) => {
-            e.stopPropagation();
-            toggleFavorite(previewProduct);
-          }}
-        >
-          {isFavorite(previewProduct.id) ? "❤" : "♡"}
-        </button>
-
-        <div className="product-image-wrap">
-          <img
-            src={getImageUrl(previewProduct.image_url, 700)}
-            alt={previewProduct.name}
-            className="product-image"
-            loading="lazy"
-            decoding="async"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = defaultProductImage;
-            }}
-          />
-        </div>
-
-        <div className="product-card-body">
-          <h3>{getDisplayProductName(product.name)}</h3>
-
-          {variantProducts.length > 1 && (
-            <div className="product-variants-preview">
-              <div className="variant-dots">
-                {variantProducts.slice(0, 6).map((variant) => (
-                  <button
-                    key={variant.id}
-                    className={`variant-dot ${
-                      variant.id === previewProduct.id ? "active-variant-dot" : ""
-                    }`}
-                    title={getShadeName(variant.name) || variant.name}
-                    onMouseEnter={() => {
-                      setHoveredVariantByProductId((prev) => ({
-                        ...prev,
-                        [product.id]: variant.id
-                      }));
-                    }}
-                    onFocus={() => {
-                      setHoveredVariantByProductId((prev) => ({
-                        ...prev,
-                        [product.id]: variant.id
-                      }));
-                    }}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedProduct(variant);
-                      setSelectedImage(getProductImages(variant)[0]);
-                      setPage("product");
-                      setTimeout(() => {
-                        window.scrollTo({ top: 0, behavior: "smooth" });
-                      }, 50);
-                    }}
-                  >
-                    <img
-                      src={getImageUrl(variant.image_url, 120)}
-                      alt={variant.name}
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = defaultProductImage;
-                      }}
-                    />
-                  </button>
-                ))}
-              </div>
-
-              <span className="variants-count">
-                {variantProducts.length} shades available
-              </span>
-            </div>
-          )}
-
-          {getShadeName(previewProduct.name) && (
-            <p className="card-shade-name">{getShadeName(previewProduct.name)}</p>
-          )}
-
-          <p className="product-price">{previewProduct.price} ₪</p>
-
-          {previewProduct.stock === 0 && (
-            <span className="product-out-badge">{t[language].outOfStock}</span>
-          )}
-
-          <button
-            className="add-cart-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              addToCart(previewProduct);
-            }}
-            disabled={previewProduct.stock === 0}
-          >
-            {previewProduct.stock === 0 ? t[language].outOfStock : t[language].addToCart}
-          </button>
-        </div>
-      </div>
-    );
-  };
-
-
-  const renderProductDetails = () => {
-    if (!selectedProduct) return null;
-
-    const galleryImages = getProductImages(selectedProduct);
-    const currentImageIndex = galleryImages.findIndex((image) => image === selectedImage);
-    const safeImageIndex = currentImageIndex === -1 ? 0 : currentImageIndex;
-
-    const goToPreviousImage = () => {
-      const previousIndex =
-        safeImageIndex === 0 ? galleryImages.length - 1 : safeImageIndex - 1;
-      setSelectedImage(galleryImages[previousIndex]);
-    };
-
-    const goToNextImage = () => {
-      const nextIndex =
-        safeImageIndex === galleryImages.length - 1 ? 0 : safeImageIndex + 1;
-      setSelectedImage(galleryImages[nextIndex]);
-    };
-
-    const selectedBaseName = getBaseProductName(selectedProduct.name);
-
-    const relatedProducts = uniqueProducts
-      .filter(
-        (product) =>
-          product.id !== selectedProduct.id &&
-          String(product.category_id) === String(selectedProduct.category_id) &&
-          getBaseProductName(product.name) !== selectedBaseName
-      )
-      .slice(0, 4);
-
-    const fallbackRelatedProducts = uniqueProducts
-      .filter(
-        (product) =>
-          product.id !== selectedProduct.id &&
-          getBaseProductName(product.name) !== selectedBaseName
-      )
-      .slice(0, 4);
-
-    const productsToShow =
-      relatedProducts.length > 0 ? relatedProducts : fallbackRelatedProducts;
-
-    return (
-      <main className="product-details-page">
-        <button
-          className="continue-shopping-btn"
-          onClick={() => {
-            setPage("shop");
-            setSelectedProduct(null);
-            setTimeout(() => {
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }, 50);
-          }}
-        >
-          ← Continue Shopping
-        </button>
-
-        <section className="product-details-layout">
-          <div className="product-details-gallery">
-            <div className="product-details-main-image-box">
-              {galleryImages.length > 1 && (
-                <button
-                  className="image-arrow image-arrow-left"
-                  onClick={goToPreviousImage}
-                  aria-label="Previous product image"
-                >
-                  ‹
-                </button>
-              )}
-
-              <img
-               src={getImageUrl(galleryImages[safeImageIndex], 1000)}
-                alt={selectedProduct.name}
-                className="product-details-main-image"
-                loading="eager"
-                decoding="async"
-                fetchPriority="high"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = defaultProductImage;
-                }}
-              />
-
-              {galleryImages.length > 1 && (
-                <button
-                  className="image-arrow image-arrow-right"
-                  onClick={goToNextImage}
-                  aria-label="Next product image"
-                >
-                  ›
-                </button>
-              )}
-
-              {galleryImages.length > 1 && (
-                <div className="image-counter">
-                  {safeImageIndex + 1} / {galleryImages.length}
-                </div>
-              )}
-            </div>
-
-            <div className="product-details-thumbnails">
-              {galleryImages.map((image, index) => (
-                <button
-                  key={index}
-                  className={`product-details-thumb-btn ${
-                   galleryImages[safeImageIndex] === image ? "active-detail-thumb" : ""
-                  }`}
-                  onClick={() => setSelectedImage(image)}
-                >
-                  <img
-                    src={getImageUrl(image, 160)}
-                    alt={`${selectedProduct.name} ${index + 1}`}
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = defaultProductImage;
-                    }}
-                  />
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="product-details-info">
-            <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
-            <h1>{getDisplayProductName(selectedProduct.name)}</h1>
-
-            <p className="product-details-shade">
-              {getShadeName(selectedProduct.name)
-                ? `Shade: ${getShadeName(selectedProduct.name)}`
-                : "Soft ELORIA beauty pick"}
-            </p>
-
-            {getAllProductVariants(selectedProduct).length > 1 && (
-              <div className="details-variants-box">
-                <p>Choose shade</p>
-
-                <div className="details-variant-list">
-                  {getAllProductVariants(selectedProduct).map((variant) => (
-                    <button
-                      key={variant.id}
-                      className={`details-variant-btn ${
-                        variant.id === selectedProduct.id ? "active-details-variant" : ""
-                      }`}
-                      onClick={() => {
-                        setSelectedProduct(variant);
-                        setSelectedImage(getProductImages(variant)[0]);
-                      }}
-                    >
-                      <img
-                        src={getImageUrl(variant.image_url, 120)}
-                        alt={variant.name}
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultProductImage;
-                        }}
-                      />
-                      <span>{getShadeName(variant.name) || variant.name}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <p className="product-details-description">
-              A beautiful ELORIA pick designed to add a soft, elegant touch to
-              your makeup collection. Browse the gallery, check availability,
-              and add it to your bag when you are ready.
-            </p>
-
-            <div className="product-details-price-row">
-              <span className="product-details-price">{selectedProduct.price} ₪</span>
-              <span
-                className={`stock-badge ${
-                  selectedProduct.stock === 0 ? "out-stock" : "in-stock"
-                }`}
-              >
-                {selectedProduct.stock === 0
-                  ? t[language].outOfStock
-                  : t[language].available}
-              </span>
-            </div>
-
-            <div className="product-details-actions">
-              <button
-                className="details-add-cart-btn"
-                onClick={() => addToCart(selectedProduct)}
-                disabled={selectedProduct.stock === 0}
-              >
-                {selectedProduct.stock === 0
-                  ? t[language].outOfStock
-                  : t[language].addToCart}
-              </button>
-
-              <button
-                className={`details-favorite-btn ${
-                  isFavorite(selectedProduct.id) ? "active-favorite" : ""
-                }`}
-                onClick={() => toggleFavorite(selectedProduct)}
-              >
-                {isFavorite(selectedProduct.id) ? "❤ Saved" : "♡ Save"}
-              </button>
-            </div>
-          </div>
-        </section>
-
-        <section className="related-products-section">
-          <div className="home-strip-header">
-            <p className="section-tag">RELATED PRODUCTS</p>
-            <h2>You may also like</h2>
-            <button
-              className="view-all-btn"
-              onClick={() => {
-                setPage("shop");
-                setTimeout(() => {
-                  window.scrollTo({ top: 0, behavior: "smooth" });
-                }, 50);
-              }}
-            >
-              View all products
-            </button>
-          </div>
-
-          <div className="home-products-row">
-            {productsToShow.map((product) => renderStoreProductCard(product))}
-          </div>
-        </section>
-      </main>
-    );
-  };
 
 
   const normalizedCheckoutPhone = customerInfo.phone.replace(/\D/g, "");
@@ -1924,64 +1168,43 @@ setPreviewImages({
     customerInfo.city.trim() &&
     customerInfo.address.trim();
 
+  const startDrag = (e) => {
+    const slider = e.currentTarget;
+    navIsDraggingRef.current = true;
+    slider.classList.add("dragging");
+
+    navStartXRef.current = e.pageX - slider.offsetLeft;
+    navScrollLeftRef.current = slider.scrollLeft;
+  };
+
+  const onDrag = (e) => {
+    if (!navIsDraggingRef.current) return;
+
+    const slider = e.currentTarget;
+    e.preventDefault();
+
+    const x = e.pageX - slider.offsetLeft;
+    const walk = (x - navStartXRef.current) * 1.5;
+
+    slider.scrollLeft = navScrollLeftRef.current - walk;
+  };
+
+  const stopDrag = (e) => {
+    navIsDraggingRef.current = false;
+
+    if (e?.currentTarget) {
+      e.currentTarget.classList.remove("dragging");
+    }
+  };
+
   if (isAdmin) {
     return (
       <div className="admin-dashboard-layout">
-        <aside className="admin-sidebar">
-          <div className="admin-sidebar-brand">ELORIA Admin</div>
-
-          <button
-            className={
-              adminView === "dashboard" ? "sidebar-link active" : "sidebar-link"
-            }
-            onClick={() => setAdminView("dashboard")}
-          >
-            Dashboard
-          </button>
-
-          <button
-            className={
-              adminView === "orders" ? "sidebar-link active" : "sidebar-link"
-            }
-            onClick={() => setAdminView("orders")}
-          >
-            Orders
-          </button>
-
-          <button
-            className={
-              adminView === "products" ? "sidebar-link active" : "sidebar-link"
-            }
-            onClick={() => setAdminView("products")}
-          >
-            Products
-          </button>
-
-          <button
-            className={
-              adminView === "categories" ? "sidebar-link active" : "sidebar-link"
-            }
-            onClick={() => setAdminView("categories")}
-          >
-            Categories
-          </button>
-
-          <button
-            className={
-              adminView === "add-product"
-                ? "sidebar-link active"
-                : "sidebar-link"
-            }
-            onClick={() => setAdminView("add-product")}
-          >
-            Add Product
-          </button>
-
-          <button className="sidebar-link logout" onClick={handleAdminLogout}>
-            Logout
-          </button>
-        </aside>
-
+       <AdminSidebar
+  adminView={adminView}
+  setAdminView={setAdminView}
+  handleAdminLogout={handleAdminLogout}
+/>
         <main className="admin-main">
           <div className="admin-main-header">
             <h2>
@@ -1993,165 +1216,79 @@ setPreviewImages({
             </h2>
           </div>
 
-          {adminView === "dashboard" && renderAdminDashboardCards()}
-          {adminView === "orders" && renderAdminOrders()}
-          {adminView === "products" && renderAdminProducts()}
-          {adminView === "categories" && renderAdminCategories()}
-          {adminView === "add-product" && renderAddProduct()}
+{adminView === "dashboard" && (
+  <AdminDashboardCards
+    totalOrders={totalOrders}
+    pendingOrders={pendingOrders}
+    deliveredOrders={deliveredOrders}
+    totalProductsCount={totalProductsCount}
+    lowStockProductsCount={lowStockProductsCount}
+    outOfStockProductsCount={outOfStockProductsCount}
+  />
+)}    
+     {adminView === "orders" && (
+  <AdminOrders
+    filteredOrders={filteredOrders}
+    adminStatusFilter={adminStatusFilter}
+    setAdminStatusFilter={setAdminStatusFilter}
+    deleteOrder={deleteOrder}
+    updateOrderStatus={updateOrderStatus}
+    copyToClipboard={copyToClipboard}
+  />
+)}
+{adminView === "products" && (
+  <AdminProducts
+    filteredAdminProducts={filteredAdminProducts}
+    adminProductSearch={adminProductSearch}
+    setAdminProductSearch={setAdminProductSearch}
+    adminStockFilter={adminStockFilter}
+    setAdminStockFilter={setAdminStockFilter}
+    totalProductsCount={totalProductsCount}
+    lowStockProductsCount={lowStockProductsCount}
+    outOfStockProductsCount={outOfStockProductsCount}
+    getCategoryName={getCategoryName}
+    handleEditProduct={handleEditProduct}
+    deleteProduct={deleteProduct}
+    API_URL={API_URL}
+  />
+)}    
+     {adminView === "categories" && (
+  <AdminCategories
+    categories={categories}
+    products={products}
+    newCategoryName={newCategoryName}
+    setNewCategoryName={setNewCategoryName}
+    handleAddCategory={handleAddCategory}
+    handleDeleteCategory={handleDeleteCategory}
+  />
+)}
+         {adminView === "add-product" && (
+  <AddProductForm
+    newProduct={newProduct}
+    handleNewProductChange={handleNewProductChange}
+    categories={categories}
+    handleImagePreview={handleImagePreview}
+    previewImages={previewImages}
+    handleAddProduct={handleAddProduct}
+  />
+)}
         </main>
 
-        {showEditPopup && editingProduct && (
-  <div
-    className="edit-popup-overlay"
-    onClick={() => setShowEditPopup(false)}
-  >
-    <div className="edit-popup-box" onClick={(e) => e.stopPropagation()}>
-      <button
-        className="close-product-btn"
-        onClick={() => setShowEditPopup(false)}
-      >
-        ✕
-      </button>
-
-      <h3>Edit Product</h3>
-
-      <label>Product Name</label>
-      <input
-        name="name"
-        placeholder="Product Name"
-        value={editingProduct.name}
-        onChange={handleEditChange}
-      />
-
-      <label>Price</label>
-      <input
-        name="price"
-        type="number"
-        placeholder="Price"
-        value={editingProduct.price}
-        onChange={handleEditChange}
-      />
-
-      <label>Stock</label>
-      <input
-        name="stock"
-        type="number"
-        placeholder="Stock"
-        value={editingProduct.stock}
-        onChange={handleEditChange}
-      />
-
-      <label>Category</label>
-      <select
-        name="category_id"
-        value={editingProduct.category_id}
-        onChange={handleEditChange}
-      >
-        {categories.map((category) => (
-          <option key={category.id} value={category.id}>
-            {category.name}
-          </option>
-        ))}
-      </select>
-
-      <label>Main Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          setEditProductImage(file);
-          setPreviewImages((prev) => ({
-            ...prev,
-            image: URL.createObjectURL(file)
-          }));
-        }}
-      />
-
-      <label>Second Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          setEditProductImage2(file);
-          setPreviewImages((prev) => ({
-            ...prev,
-            image2: URL.createObjectURL(file)
-          }));
-        }}
-      />
-
-      <label>Third Image</label>
-      <input
-        type="file"
-        accept="image/*"
-        onChange={(e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-
-          setEditProductImage3(file);
-          setPreviewImages((prev) => ({
-            ...prev,
-            image3: URL.createObjectURL(file)
-          }));
-        }}
-      />
-
-      <div className="preview-images">
-        {(previewImages.image || editingProduct.image_url) && (
-          <img
-            src={previewImages.image || getImageUrl(editingProduct.image_url)}
-            alt="preview 1"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = defaultProductImage;
-            }}
-          />
-        )}
-
-        {(previewImages.image2 || editingProduct.image_url_2) && (
-          <img
-            src={previewImages.image2 || getImageUrl(editingProduct.image_url_2)}
-            alt="preview 2"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = defaultProductImage;
-            }}
-          />
-        )}
-
-        {(previewImages.image3 || editingProduct.image_url_3) && (
-          <img
-            src={previewImages.image3 || getImageUrl(editingProduct.image_url_3)}
-            alt="preview 3"
-            onError={(e) => {
-              e.target.onerror = null;
-              e.target.src = defaultProductImage;
-            }}
-          />
-        )}
-      </div>
-
-      <div className="edit-product-actions">
-        <button onClick={handleUpdateProduct} className="submit-order-btn">
-          Save Changes
-        </button>
-
-        <button
-          onClick={() => setShowEditPopup(false)}
-          className="delete-product-btn"
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
+       <EditProductPopup
+  showEditPopup={showEditPopup}
+  setShowEditPopup={setShowEditPopup}
+  editingProduct={editingProduct}
+  handleEditChange={handleEditChange}
+  categories={categories}
+  setEditProductImage={setEditProductImage}
+  setEditProductImage2={setEditProductImage2}
+  setEditProductImage3={setEditProductImage3}
+  previewImages={previewImages}
+  setPreviewImages={setPreviewImages}
+  handleUpdateProduct={handleUpdateProduct}
+  API_URL={API_URL}
+/>
+  
 
         {toast.show && (
           <div className={`toast-message toast-${toast.type}`}>
@@ -2160,123 +1297,29 @@ setPreviewImages({
         )}
       </div>
     );
+  
   }
-let isDown = false;
-let startX;
-let scrollLeft;
 
-const startDrag = (e) => {
-  const slider = e.currentTarget;
-  isDown = true;
-  slider.classList.add("dragging");
-
-  startX = e.pageX - slider.offsetLeft;
-  scrollLeft = slider.scrollLeft;
-};
-
-const onDrag = (e) => {
-  if (!isDown) return;
-
-  const slider = e.currentTarget;
-  e.preventDefault();
-
-  const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX) * 1.5;
-
-  slider.scrollLeft = scrollLeft - walk;
-};
-
-const stopDrag = () => {
-  isDown = false;
-};
   return (
     <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
-      <div className="luxury-navbar">
-        <div className="nav-left">
-          <div
-            className="logo luxury-logo"
-            onClick={() => {
-              setPage("home");
-              setSelectedCategory("all");
-              handleHiddenAdminEntry();
-            }}
-          >
-            <img src={eloriaLogo} alt="ELORIA Logo" />
-          </div>
-        </div>
-
-<div
-  className="nav-center"
-  onMouseDown={(e) => startDrag(e)}
-  onMouseMove={(e) => onDrag(e)}
-  onMouseUp={stopDrag}
-  onMouseLeave={stopDrag}
->          <div className="nav-marquee">
-            <button
-              className={selectedCategory === "all" ? "active-nav-category" : ""}
-              onClick={handleShopNow}
-            >
-              Shop All
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={`main-${category.id}`}
-                className={
-                  String(selectedCategory) === String(category.id)
-                    ? "active-nav-category"
-                    : ""
-                }
-                onClick={() => handleCategorySelect(String(category.id))}
-              >
-                {category.name}
-              </button>
-            ))}
-
-            <button
-              className={selectedCategory === "all" ? "active-nav-category" : ""}
-              onClick={handleShopNow}
-              aria-hidden="true"
-              tabIndex="-1"
-            >
-              Shop All
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={`copy-${category.id}`}
-                className={
-                  String(selectedCategory) === String(category.id)
-                    ? "active-nav-category"
-                    : ""
-                }
-                onClick={() => handleCategorySelect(String(category.id))}
-                aria-hidden="true"
-                tabIndex="-1"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="nav-right">
-          <button className="nav-icon-btn" onClick={() => setShowFavorites(true)}>
-            ♡ {favorites.length}
-          </button>
-
-          <button className="nav-icon-btn" onClick={() => setShowCart(true)}>
-            Bag ({totalItems})
-          </button>
-
-          <button
-            className="language-toggle clean-language-btn"
-            onClick={() => setLanguage(isArabic ? "en" : "ar")}
-          >
-            {isArabic ? "EN" : "AR"}
-          </button>
-        </div>
-      </div>
+      <Navbar
+        isArabic={isArabic}
+        categories={categories}
+        selectedCategory={selectedCategory}
+        favoritesCount={favorites.length}
+        totalItems={totalItems}
+        setPage={setPage}
+        setSelectedCategory={setSelectedCategory}
+        handleHiddenAdminEntry={handleHiddenAdminEntry}
+        handleShopNow={handleShopNow}
+        handleCategorySelect={handleCategorySelect}
+        setShowFavorites={setShowFavorites}
+        setShowCart={setShowCart}
+        setLanguage={setLanguage}
+        startDrag={startDrag}
+        onDrag={onDrag}
+        stopDrag={stopDrag}
+      />
 
       {page === "home" ? (
         <>
@@ -2302,7 +1345,9 @@ const stopDrag = () => {
             <div className="home-strip-header">
               <p className="section-tag">NEW ARRIVALS</p>
               <h2>Fresh beauty picks</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>View all products</button>
+              <button className="view-all-btn" onClick={handleShopNow}>
+                View all products
+              </button>
             </div>
 
             <div className="home-products-row">
@@ -2330,7 +1375,9 @@ const stopDrag = () => {
             <div className="home-strip-header">
               <p className="section-tag">SOFT BEAUTY PICKS</p>
               <h2>Made for your everyday glow</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>Shop collection</button>
+              <button className="view-all-btn" onClick={handleShopNow}>
+                Shop collection
+              </button>
             </div>
 
             <div className="home-products-row">
@@ -2359,7 +1406,9 @@ const stopDrag = () => {
             <div className="home-strip-header">
               <p className="section-tag">YOU MAY ALSO LOVE</p>
               <h2>A few more ELORIA favorites</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>Continue shopping</button>
+              <button className="view-all-btn" onClick={handleShopNow}>
+                Continue shopping
+              </button>
             </div>
 
             <div className="home-products-row">
@@ -2435,937 +1484,55 @@ const stopDrag = () => {
           </div>
         </main>
       )}
-      {showFavorites && (
-        <div className="favorites-overlay" onClick={() => setShowFavorites(false)}>
-          <div className="favorites-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="favorites-popup-header">
-              <h2>{t[language].favorites}</h2>
-              <button
-                className="close-cart-btn"
-                onClick={() => setShowFavorites(false)}
-              >
-                ✕
-              </button>
-            </div>
 
-            {favorites.length === 0 ? (
-              <div className="favorites-empty">
-                <h3>No favorites yet</h3>
-                <p>Save the products you love and come back to them anytime.</p>
-              </div>
-            ) : (
-              <div className="favorites-grid">
-                {favorites.map((item) => (
-                  <div key={item.id} className="favorite-product-card">
-                    <img
-                      src={getImageUrl(item.image_url)}
-                      alt={item.name}
-                      className="favorite-product-image"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = defaultProductImage;
-                      }}
-                    />
-
-                    <h4>{item.name}</h4>
-                    <p className="favorite-price">{item.price} ₪</p>
-
-                    <div className="favorite-actions">
-                      <button
-                        className="confirm-btn"
-                        onClick={() => {
-                          addToCart(item);
-                          setShowFavorites(false);
-                        }}
-                      >
-                        Add to Cart
-                      </button>
-
-                      <button
-                        className="cart-remove-btn"
-                        onClick={() => toggleFavorite(item)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showCart && (
-        <div className="cart-overlay premium-cart-overlay" onClick={() => setShowCart(false)}>
-          <aside className="cart-popup premium-cart-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="cart-popup-header premium-cart-header">
-              <div>
-                <p className="cart-mini-label">Your ELORIA bag</p>
-                <h2>{t[language].cart}</h2>
-              </div>
-
-              <button
-                className="close-cart-btn premium-close-btn"
-                onClick={() => setShowCart(false)}
-                aria-label="Close cart"
-              >
-                ✕
-              </button>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="premium-empty-cart">
-                <div className="empty-cart-icon">♡</div>
-                <h3>Your bag is empty</h3>
-                <p>Add your favorite ELORIA picks and come back here to complete your order.</p>
-                <button
-                  className="confirm-btn"
-                  onClick={() => {
-                    setShowCart(false);
-                    handleShopNow();
-                  }}
-                >
-                  Start Shopping
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="cart-popup-items premium-cart-items">
-                  {cart.map((item) => (
-                    <div key={item.id} className="cart-item-card premium-cart-item">
-                      <img
-                        src={getImageUrl(item.image_url)}
-                        alt={item.name}
-                        className="cart-item-image"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultProductImage;
-                        }}
-                      />
-
-                      <div className="cart-item-info">
-                        <div className="cart-item-top">
-                          <div>
-                            <h4>{getDisplayProductName(item.name)}</h4>
-                            {getShadeName(item.name) && (
-                              <p className="cart-item-shade">{getShadeName(item.name)}</p>
-                            )}
-                          </div>
-
-                          <button
-                            className="cart-item-remove-x"
-                            onClick={() => removeFromCart(item.id)}
-                            aria-label="Remove item"
-                          >
-                            ✕
-                          </button>
-                        </div>
-
-                        <div className="cart-item-bottom">
-                          <div className="quantity-controls premium-quantity-controls">
-                            <button
-                              className="qty-btn"
-                              onClick={() => decreaseQuantity(item.id)}
-                              aria-label="Decrease quantity"
-                            >
-                              −
-                            </button>
-
-                            <span className="cart-quantity-number">{item.quantity}</span>
-
-                            <button
-                              className="qty-btn"
-                              onClick={() => increaseQuantity(item.id)}
-                              aria-label="Increase quantity"
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          <strong className="cart-line-total">
-                            {(Number(item.price) * item.quantity).toFixed(2)} ₪
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="premium-cart-footer">
-                  <div className="cart-total-line">
-                    <span>Items</span>
-                    <strong>{totalItems}</strong>
-                  </div>
-
-                  <div className="cart-total-line cart-grand-total">
-                    <span>Total</span>
-                    <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
-                  </div>
-
-                  <p className="cart-delivery-note">Payment is collected on delivery.</p>
-
-                  <button
-                    className="confirm-btn premium-checkout-btn"
-                    onClick={() => {
-                      setShowCheckout(true);
-                      setShowCart(false);
-                    }}
-                  >
-                    Continue to Checkout
-                  </button>
-                </div>
-              </>
-            )}
-          </aside>
-        </div>
-      )}
-
-      {showCheckout && (
-        <div
-          className="checkout-overlay premium-checkout-overlay"
-          onClick={() => setShowCheckout(false)}
-        >
-          <div className="checkout-popup premium-checkout-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="checkout-popup-header premium-checkout-header">
-              <div>
-                <p className="checkout-step-label">Secure order details</p>
-                <h2>{t[language].checkout}</h2>
-                <span>Fill your delivery details to place the order.</span>
-              </div>
-
-              <button
-                className="close-product-btn premium-close-btn"
-                onClick={() => setShowCheckout(false)}
-                aria-label="Close checkout"
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="checkout-layout-grid premium-checkout-grid">
-              <div className="checkout-form-fields premium-checkout-form">
-                <label>Full Name *</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Your full name"
-                  value={customerInfo.fullName}
-                  onChange={handleInputChange}
-                  className={checkoutErrors.fullName ? "input-error" : ""}
-                />
-                {checkoutErrors.fullName && <small className="field-error">{checkoutErrors.fullName}</small>}
-
-                <label>Phone Number *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="05X-XXXXXXX"
-                  value={customerInfo.phone}
-                  onChange={handleInputChange}
-                  className={checkoutErrors.phone ? "input-error" : ""}
-                />
-                {checkoutErrors.phone && <small className="field-error">{checkoutErrors.phone}</small>}
-
-                <label>City *</label>
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={customerInfo.city}
-                  onChange={handleInputChange}
-                  className={checkoutErrors.city ? "input-error" : ""}
-                />
-                {checkoutErrors.city && <small className="field-error">{checkoutErrors.city}</small>}
-
-                <label>Address *</label>
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Street, building, floor"
-                  value={customerInfo.address}
-                  onChange={handleInputChange}
-                  className={checkoutErrors.address ? "input-error" : ""}
-                />
-                {checkoutErrors.address && <small className="field-error">{checkoutErrors.address}</small>}
-
-                <label>Notes</label>
-                <textarea
-                  name="notes"
-                  placeholder="Any notes for delivery?"
-                  value={customerInfo.notes}
-                  onChange={handleInputChange}
-                ></textarea>
-              </div>
-
-              <div className="checkout-summary-card premium-checkout-summary">
-                <h3>Order Summary</h3>
-
-                <div className="checkout-summary-items">
-                  {cart.map((item) => (
-                    <div key={item.id} className="checkout-summary-item">
-                      <img
-                        src={getImageUrl(item.image_url)}
-                        alt={item.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultProductImage;
-                        }}
-                      />
-
-                      <div>
-                        <strong>{getDisplayProductName(item.name)}</strong>
-                        {getShadeName(item.name) && <span>{getShadeName(item.name)}</span>}
-                        <p>Qty: {item.quantity} · {(Number(item.price) * item.quantity).toFixed(2)} ₪</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="checkout-total-row">
-                  <span>Items</span>
-                  <strong>{totalItems}</strong>
-                </div>
-
-                <div className="checkout-total-row checkout-final-total">
-                  <span>Total</span>
-                  <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
-                </div>
-
-                <p className="checkout-payment-note">
-                  Payment method: cash on delivery.
-                </p>
-
-                <button
-                  className="submit-order-btn premium-submit-order-btn"
-                  onClick={handlePlaceOrder}
-                  disabled={!isCheckoutValid || isSubmittingOrder}
-                >
-                  {isSubmittingOrder ? "Sending order..." : "Place Order"}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showOrderSuccess && (
-        <div className="checkout-overlay premium-success-overlay" onClick={() => setShowOrderSuccess(false)}>
-          <div className="order-success-card" onClick={(e) => e.stopPropagation()}>
-            <button
-              className="premium-close-btn success-close-btn"
-              onClick={() => setShowOrderSuccess(false)}
-              aria-label="Close success message"
-            >
-              ✕
-            </button>
-
-            <div className="success-icon">✓</div>
-            <h2>Order placed successfully</h2>
-            {lastOrderId && <p className="success-order-id">Order #{lastOrderId}</p>}
-            <p>Thank you for shopping with ELORIA. We will contact you soon to confirm delivery.</p>
-
-            <button
-              className="confirm-btn premium-checkout-btn"
-              onClick={() => {
-                setShowOrderSuccess(false);
-                handleShopNow();
-              }}
-            >
-              Continue Shopping
-            </button>
-          </div>
-        </div>
-      )}
-
-      {toast.show && (
-          <div className={`toast-message toast-${toast.type}`}>
-            {toast.message}
-          </div>
-        )}
-      </div>
-    );
-  }
-let isDown = false;
-let startX;
-let scrollLeft;
-
-const startDrag = (e) => {
-  const slider = e.currentTarget;
-  isDown = true;
-  slider.classList.add("dragging");
-
-  startX = e.pageX - slider.offsetLeft;
-  scrollLeft = slider.scrollLeft;
-};
-
-const onDrag = (e) => {
-  if (!isDown) return;
-
-  const slider = e.currentTarget;
-  e.preventDefault();
-
-  const x = e.pageX - slider.offsetLeft;
-  const walk = (x - startX) * 1.5;
-
-  slider.scrollLeft = scrollLeft - walk;
-};
-
-const stopDrag = () => {
-  isDown = false;
-};
-  return (
-    <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
-      <div className="luxury-navbar">
-        <div className="nav-left">
-          <div
-            className="logo luxury-logo"
-            onClick={() => {
-              setPage("home");
-              setSelectedCategory("all");
-              handleHiddenAdminEntry();
-            }}
-          >
-            <img src={eloriaLogo} alt="ELORIA Logo" />
-          </div>
-        </div>
-
-<div
-  className="nav-center"
-  onMouseDown={(e) => startDrag(e)}
-  onMouseMove={(e) => onDrag(e)}
-  onMouseUp={stopDrag}
-  onMouseLeave={stopDrag}
->          <div className="nav-marquee">
-            <button
-              className={selectedCategory === "all" ? "active-nav-category" : ""}
-              onClick={handleShopNow}
-            >
-              Shop All
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={`main-${category.id}`}
-                className={
-                  String(selectedCategory) === String(category.id)
-                    ? "active-nav-category"
-                    : ""
-                }
-                onClick={() => handleCategorySelect(String(category.id))}
-              >
-                {category.name}
-              </button>
-            ))}
-
-            <button
-              className={selectedCategory === "all" ? "active-nav-category" : ""}
-              onClick={handleShopNow}
-              aria-hidden="true"
-              tabIndex="-1"
-            >
-              Shop All
-            </button>
-
-            {categories.map((category) => (
-              <button
-                key={`copy-${category.id}`}
-                className={
-                  String(selectedCategory) === String(category.id)
-                    ? "active-nav-category"
-                    : ""
-                }
-                onClick={() => handleCategorySelect(String(category.id))}
-                aria-hidden="true"
-                tabIndex="-1"
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="nav-right">
-          <button className="nav-icon-btn" onClick={() => setShowFavorites(true)}>
-            ♡ {favorites.length}
-          </button>
-
-          <button className="nav-icon-btn" onClick={() => setShowCart(true)}>
-            Bag ({totalItems})
-          </button>
-
-          <button
-            className="language-toggle clean-language-btn"
-            onClick={() => setLanguage(isArabic ? "en" : "ar")}
-          >
-            {isArabic ? "EN" : "AR"}
-          </button>
-        </div>
-      </div>
-
-      {page === "home" ? (
-        <>
-          <section className="hero-video-section">
-            <video className="hero-video" autoPlay muted loop playsInline>
-              <source src={heroVideo} type="video/mp4" />
-            </video>
-
-            <div className="hero-overlay"></div>
-
-            <div className="hero-content">
-              <p className="hero-badge">{t[language].heroBadge}</p>
-              <h1>{t[language].heroTitle}</h1>
-              <p className="hero-description">{t[language].heroDescription}</p>
-
-              <button className="hero-shop-btn" onClick={handleShopNow}>
-                {t[language].shopNow}
-              </button>
-            </div>
-          </section>
-
-          <section className="home-product-strip">
-            <div className="home-strip-header">
-              <p className="section-tag">NEW ARRIVALS</p>
-              <h2>Fresh beauty picks</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>View all products</button>
-            </div>
-
-            <div className="home-products-row">
-              {latestProducts.map((product) => renderStoreProductCard(product))}
-            </div>
-          </section>
-
-          <section className="who-we-are-section">
-            <div className="who-we-are-container">
-              <div className="who-we-are-text">
-                <p className="section-tag">{t[language].whoTag}</p>
-                <h2>{t[language].whoTitle}</h2>
-                <p className="who-we-are-description">{t[language].whoP1}</p>
-                <p className="who-we-are-description">{t[language].whoP2}</p>
-              </div>
-
-              <div className="who-we-are-logo-box">
-                <img src={eloriaLogo} alt="ELORIA logo" className="who-we-are-logo" />
-                <p className="who-we-are-year">{t[language].founded}</p>
-              </div>
-            </div>
-          </section>
-
-          <section className="home-product-strip home-product-strip-alt">
-            <div className="home-strip-header">
-              <p className="section-tag">SOFT BEAUTY PICKS</p>
-              <h2>Made for your everyday glow</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>Shop collection</button>
-            </div>
-
-            <div className="home-products-row">
-              {softBeautyPicks.map((product) => renderStoreProductCard(product))}
-            </div>
-          </section>
-
-          <section className="instagram-section">
-            <div className="instagram-box">
-              <p className="section-tag">{t[language].connectTag}</p>
-              <h2>{t[language].instagramTitle}</h2>
-              <p>{t[language].instagramText}</p>
-
-              <a
-                href="https://instagram.com/theeloriaglow"
-                target="_blank"
-                rel="noreferrer"
-                className="instagram-link-btn"
-              >
-                @theeloriaglow
-              </a>
-            </div>
-          </section>
-
-          <section className="home-product-strip">
-            <div className="home-strip-header">
-              <p className="section-tag">YOU MAY ALSO LOVE</p>
-              <h2>A few more ELORIA favorites</h2>
-              <button className="view-all-btn" onClick={handleShopNow}>Continue shopping</button>
-            </div>
-
-            <div className="home-products-row">
-              {finalHomeProducts.map((product) => renderStoreProductCard(product))}
-            </div>
-          </section>
-
-          <div className="final-brand-message">
-            <h3>{t[language].finalTitle}</h3>
-            <p>{t[language].finalText}</p>
-          </div>
-        </>
-      ) : page === "product" && selectedProduct ? (
-        renderProductDetails()
-      ) : (
-        <main className="shop-page">
-          <section className="shop-hero">
-            <p className="section-tag">SHOP ELORIA</p>
-            <h1>Explore the full collection</h1>
-            <p>
-              Browse all products, search by name, or choose a category from the top menu.
-            </p>
-          </section>
-
-          <div className="search-box shop-search-box">
-            <input
-              type="text"
-              placeholder={t[language].searchPlaceholder}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-
-          <div className="sort-box">
-            <select
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value)}
-            >
-              <option value="default">{t[language].sortDefault}</option>
-              <option value="low-to-high">{t[language].lowToHigh}</option>
-              <option value="high-to-low">{t[language].highToLow}</option>
-            </select>
-          </div>
-
-          <div className="clear-filters-box">
-            <button
-              className="clear-filters-btn"
-              onClick={() => {
-                clearFilters();
-                setPage("shop");
-              }}
-            >
-              {t[language].clearFilters}
-            </button>
-          </div>
-
-          <div id="products-section" className="shop-products-anchor">
-            <p className="products-count">
-              {isArabic
-                ? `عرض ${filteredProducts.length} منتجات`
-                : `Showing ${filteredProducts.length} products`}
-            </p>
-          </div>
-
-          <div className="products-container">
-            {loading ? (
-              <div className="loader"></div>
-            ) : filteredProducts.length > 0 ? (
-              filteredProducts.map((product) => renderStoreProductCard(product))
-            ) : (
-              <p className="no-products-message">{t[language].noProducts}</p>
-            )}
-          </div>
-        </main>
-      )}
-      {showFavorites && (
-        <div className="favorites-overlay" onClick={() => setShowFavorites(false)}>
-          <div className="favorites-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="favorites-popup-header">
-              <h2>{t[language].favorites}</h2>
-              <button
-                className="close-cart-btn"
-                onClick={() => setShowFavorites(false)}
-              >
-                ✕
-              </button>
-            </div>
-
-            {favorites.length === 0 ? (
-              <div className="favorites-empty">
-                <h3>No favorites yet</h3>
-                <p>Save the products you love and come back to them anytime.</p>
-              </div>
-            ) : (
-              <div className="favorites-grid">
-                {favorites.map((item) => (
-                  <div key={item.id} className="favorite-product-card">
-                    <img
-                      src={getImageUrl(item.image_url)}
-                      alt={item.name}
-                      className="favorite-product-image"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = defaultProductImage;
-                      }}
-                    />
-
-                    <h4>{item.name}</h4>
-                    <p className="favorite-price">{item.price} ₪</p>
-
-                    <div className="favorite-actions">
-                      <button
-                        className="confirm-btn"
-                        onClick={() => {
-                          addToCart(item);
-                          setShowFavorites(false);
-                        }}
-                      >
-                        Add to Cart
-                      </button>
-
-                      <button
-                        className="cart-remove-btn"
-                        onClick={() => toggleFavorite(item)}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {showCart && (
-        <div className="cart-overlay premium-cart-overlay" onClick={() => setShowCart(false)}>
-          <aside className="cart-popup premium-cart-drawer" onClick={(e) => e.stopPropagation()}>
-            <div className="cart-popup-header premium-cart-header">
-              <div>
-                <p className="cart-mini-label">Your ELORIA bag</p>
-                <h2>{t[language].cart}</h2>
-              </div>
-
-              <button
-                className="close-cart-btn premium-close-btn"
-                onClick={() => setShowCart(false)}
-                aria-label="Close cart"
-              >
-                ✕
-              </button>
-            </div>
-
-            {cart.length === 0 ? (
-              <div className="premium-empty-cart">
-                <div className="empty-cart-icon">♡</div>
-                <h3>Your bag is empty</h3>
-                <p>Add your favorite ELORIA picks and come back here to complete your order.</p>
-                <button
-                  className="confirm-btn"
-                  onClick={() => {
-                    setShowCart(false);
-                    handleShopNow();
-                  }}
-                >
-                  Start Shopping
-                </button>
-              </div>
-            ) : (
-              <>
-                <div className="cart-popup-items premium-cart-items">
-                  {cart.map((item) => (
-                    <div key={item.id} className="cart-item-card premium-cart-item">
-                      <img
-                        src={getImageUrl(item.image_url)}
-                        alt={item.name}
-                        className="cart-item-image"
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultProductImage;
-                        }}
-                      />
-
-                      <div className="cart-item-info">
-                        <div className="cart-item-top">
-                          <div>
-                            <h4>{getDisplayProductName(item.name)}</h4>
-                            {getShadeName(item.name) && (
-                              <p className="cart-item-shade">{getShadeName(item.name)}</p>
-                            )}
-                          </div>
-
-                          <button
-                            className="cart-item-remove-x"
-                            onClick={() => removeFromCart(item.id)}
-                            aria-label="Remove item"
-                          >
-                            ✕
-                          </button>
-                        </div>
-
-                        <div className="cart-item-bottom">
-                          <div className="quantity-controls premium-quantity-controls">
-                            <button
-                              className="qty-btn"
-                              onClick={() => decreaseQuantity(item.id)}
-                              aria-label="Decrease quantity"
-                            >
-                              −
-                            </button>
-
-                            <span className="cart-quantity-number">{item.quantity}</span>
-
-                            <button
-                              className="qty-btn"
-                              onClick={() => increaseQuantity(item.id)}
-                              aria-label="Increase quantity"
-                            >
-                              +
-                            </button>
-                          </div>
-
-                          <strong className="cart-line-total">
-                            {(Number(item.price) * item.quantity).toFixed(2)} ₪
-                          </strong>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="premium-cart-footer">
-                  <div className="cart-total-line">
-                    <span>Items</span>
-                    <strong>{totalItems}</strong>
-                  </div>
-
-                  <div className="cart-total-line cart-grand-total">
-                    <span>Total</span>
-                    <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
-                  </div>
-
-                  <p className="cart-delivery-note">Payment is collected on delivery.</p>
-
-                  <button
-                    className="confirm-btn premium-checkout-btn"
-                    onClick={() => {
-                      setShowCheckout(true);
-                      setShowCart(false);
-                    }}
-                  >
-                    Continue to Checkout
-                  </button>
-                </div>
-              </>
-            )}
-          </aside>
-        </div>
-      )}
-
-      {showCheckout && (
-        <div
-          className="checkout-overlay"
-          onClick={() => setShowCheckout(false)}
-        >
-          <div className="checkout-popup premium-checkout-popup" onClick={(e) => e.stopPropagation()}>
-            <div className="checkout-popup-header">
-              <div>
-                <p className="checkout-step-label">Secure order details</p>
-                <h2>{t[language].checkout}</h2>
-              </div>
-
-              <button
-                className="close-product-btn"
-                onClick={() => setShowCheckout(false)}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div className="checkout-layout-grid">
-              <div className="checkout-form-fields">
-                <label>Full Name *</label>
-                <input
-                  type="text"
-                  name="fullName"
-                  placeholder="Full Name"
-                  value={customerInfo.fullName}
-                  onChange={handleInputChange}
-                />
-
-                <label>Phone Number *</label>
-                <input
-                  type="tel"
-                  name="phone"
-                  placeholder="Phone Number"
-                  value={customerInfo.phone}
-                  onChange={handleInputChange}
-                />
-
-                <label>City *</label>
-                <input
-                  type="text"
-                  name="city"
-                  placeholder="City"
-                  value={customerInfo.city}
-                  onChange={handleInputChange}
-                />
-
-                <label>Address *</label>
-                <input
-                  type="text"
-                  name="address"
-                  placeholder="Address"
-                  value={customerInfo.address}
-                  onChange={handleInputChange}
-                />
-
-                <label>Notes</label>
-                <textarea
-                  name="notes"
-                  placeholder="Notes"
-                  value={customerInfo.notes}
-                  onChange={handleInputChange}
-                ></textarea>
-              </div>
-
-              <div className="checkout-summary-card">
-                <h3>Order Summary</h3>
-
-                <div className="checkout-summary-items">
-                  {cart.map((item) => (
-                    <div key={item.id} className="checkout-summary-item">
-                      <img
-                        src={getImageUrl(item.image_url, 120)}
-                        alt={item.name}
-                        loading="lazy"
-                        onError={(e) => {
-                          e.target.onerror = null;
-                          e.target.src = defaultProductImage;
-                        }}
-                      />
-
-                      <div>
-                        <strong>{getDisplayProductName(item.name)}</strong>
-                        {getShadeName(item.name) && <span>{getShadeName(item.name)}</span>}
-                        <p>Qty: {item.quantity} · {item.price} ₪</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="checkout-total-row">
-                  <span>Total</span>
-                  <strong>{totalPrice} ₪</strong>
-                </div>
-
-                <p className="checkout-payment-note">
-                  Payment method: cash on delivery.
-                </p>
-              </div>
-            </div>
-
-            <button
-              className="submit-order-btn premium-submit-order-btn"
-              onClick={handlePlaceOrder}
-              disabled={!isCheckoutValid || isSubmittingOrder}
-            >
-              {isSubmittingOrder ? "Sending..." : "Place Order"}
-            </button>
-          </div>
-        </div>
-      )}
-
-
+      <FavoritesPopup
+        showFavorites={showFavorites}
+        setShowFavorites={setShowFavorites}
+        favorites={favorites}
+        addToCart={addToCart}
+        toggleFavorite={toggleFavorite}
+        API_URL={API_URL}
+      />
+
+      <CartDrawer
+        showCart={showCart}
+        setShowCart={setShowCart}
+        setShowCheckout={setShowCheckout}
+        cart={cart}
+        totalItems={totalItems}
+        totalPrice={totalPrice}
+        increaseQuantity={increaseQuantity}
+        decreaseQuantity={decreaseQuantity}
+        removeFromCart={removeFromCart}
+        handleShopNow={handleShopNow}
+        API_URL={API_URL}
+        t={t}
+        language={language}
+      />
+
+      <CheckoutPopup
+        showCheckout={showCheckout}
+        setShowCheckout={setShowCheckout}
+        customerInfo={customerInfo}
+        checkoutErrors={checkoutErrors}
+        handleInputChange={handleInputChange}
+        cart={cart}
+        totalItems={totalItems}
+        totalPrice={totalPrice}
+        handlePlaceOrder={handlePlaceOrder}
+        isCheckoutValid={isCheckoutValid}
+        isSubmittingOrder={isSubmittingOrder}
+        API_URL={API_URL}
+        t={t}
+        language={language}
+      />
+
+      <OrderSuccessPopup
+        showOrderSuccess={showOrderSuccess}
+        setShowOrderSuccess={setShowOrderSuccess}
+        lastOrderId={lastOrderId}
+        handleShopNow={handleShopNow}
+      />
 
       {toast.show && (
         <div className={`toast-message toast-${toast.type}`}>
@@ -3378,6 +1545,6 @@ const stopDrag = () => {
       </footer>
     </div>
   );
-
+}
 
 export default App;
