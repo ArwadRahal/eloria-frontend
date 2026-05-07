@@ -65,7 +65,6 @@ function Navbar({
           <button
             className={selectedCategory === "all" ? "active-nav-category" : ""}
             onClick={handleShopNow}
-            aria-hidden="true"
             tabIndex="-1"
           >
             Shop All
@@ -80,7 +79,6 @@ function Navbar({
                   : ""
               }
               onClick={() => handleCategorySelect(String(category.id))}
-              aria-hidden="true"
               tabIndex="-1"
             >
               {category.name}
