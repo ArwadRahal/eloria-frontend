@@ -134,13 +134,15 @@ function ProductDetails({
                 onClick={() => setSelectedImage(image)}
               >
                 <img
-                  src={getImageUrl(image, API_URL)}
-                  alt={`${selectedProduct.name} ${index + 1}`}
-                  onError={(e) => {
-                    e.target.onerror = null;
-                    e.target.src = defaultProductImage;
-                  }}
-                />
+  src={getImageUrl(image, API_URL)}
+  alt={`${selectedProduct.name} ${index + 1}`}
+  loading="lazy"
+  decoding="async"
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = defaultProductImage;
+  }}
+/>
               </button>
             ))}
           </div>
@@ -173,13 +175,15 @@ function ProductDetails({
                     }}
                   >
                     <img
-                      src={getImageUrl(variant.image_url, API_URL)}
-                      alt={variant.name}
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = defaultProductImage;
-                      }}
-                    />
+  src={getImageUrl(variant.image_url, API_URL)}
+  alt={variant.name}
+  loading="lazy"
+  decoding="async"
+  onError={(e) => {
+    e.target.onerror = null;
+    e.target.src = defaultProductImage;
+  }}
+/>
                     <span>{getShadeName(variant.name) || variant.name}</span>
                   </button>
                 ))}
