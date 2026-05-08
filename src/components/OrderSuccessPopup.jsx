@@ -22,7 +22,6 @@ function OrderSuccessPopup({
 
         <div className="success-icon">✓</div>
         <h2>Order placed successfully</h2>
-        {lastOrderId && <p className="success-order-id">Order #{lastOrderId}</p>}
         <p>
           Thank you for shopping with ELORIA. We will contact you soon to confirm delivery.
         </p>
