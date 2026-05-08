@@ -71,6 +71,24 @@ const isArabic = language === "ar";
 const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
 const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
 const CART_STORAGE_KEY = "eloria_cart_v1";
+
+const getAdminHeaders = () => {
+  const token = localStorage.getItem("eloria_admin_token");
+
+  return {
+    "x-admin-token": token || ""
+  };
+};
+
+const getAdminJsonHeaders = () => {
+  const token = localStorage.getItem("eloria_admin_token");
+
+  return {
+    "Content-Type": "application/json",
+    "x-admin-token": token || ""
+  };
+};
+
 const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
 
@@ -330,9 +348,7 @@ const t = {
     try {
       const response = await fetch(`${API_URL}/categories`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: getAdminJsonHeaders(),
         body: JSON.stringify({ name: trimmedName })
       });
 
@@ -372,8 +388,9 @@ const t = {
 
     try {
       const response = await fetch(`${API_URL}/categories/${category.id}`, {
-        method: "DELETE"
-      });
+  method: "DELETE",
+  headers: getAdminHeaders()
+});
 
       const data = await response.json();
 
