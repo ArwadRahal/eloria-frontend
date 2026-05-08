@@ -444,8 +444,9 @@ const t = {
 
   const fetchOrders = async () => {
     try {
-      const res = await fetch(`${API_URL}/orders-with-items`);
-      const data = await res.json();
+const res = await fetch(`${API_URL}/orders-with-items`, {
+  headers: getAdminHeaders()
+});      const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
       console.log(err);
