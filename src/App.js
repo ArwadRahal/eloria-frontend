@@ -529,33 +529,47 @@ const t = {
     return foundCategory ? foundCategory.name : "Unknown";
   };
 
-  const handleHiddenAdminEntry = () => {
-    logoClickCountRef.current += 1;
+  const handleHiddenAdminEntry = async () => {
+  logoClickCountRef.current += 1;
 
-    if (logoClickTimerRef.current) {
-      clearTimeout(logoClickTimerRef.current);
-    }
+  if (logoClickTimerRef.current) {
+    clearTimeout(logoClickTimerRef.current);
+  }
 
-    logoClickTimerRef.current = setTimeout(() => {
-      logoClickCountRef.current = 0;
-    }, 1500);
+  logoClickTimerRef.current = setTimeout(() => {
+    logoClickCountRef.current = 0;
+  }, 1500);
 
-    if (logoClickCountRef.current >= 5) {
-      logoClickCountRef.current = 0;
-      const password = prompt("Enter admin password:");
+  if (logoClickCountRef.current >= 5) {
+    logoClickCountRef.current = 0;
 
-      if (password === null) return;
+    const password = prompt("Enter admin password:");
+    if (password === null) return;
 
-      if (password === "eloria-admin") {
+    try {
+      const response = await fetch(`${API_URL}/admin-login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password })
+      });
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         setIsAdmin(true);
         setAdminView("dashboard");
         showToastMessage("Admin mode activated 🔐", "success");
       } else {
-        showToastMessage("Wrong password ❌", "error");
+        showToastMessage(data.message || "Wrong password ❌", "error");
       }
+    } catch (error) {
+      console.log("Admin login error:", error);
+      showToastMessage("Admin login failed. Try again.", "error");
     }
-  };
-
+  }
+};
   const handleAdminLogout = () => {
     setIsAdmin(false);
     setAdminView("dashboard");
