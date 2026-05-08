@@ -557,11 +557,14 @@ const t = {
 
       const data = await response.json();
 
-      if (response.ok && data.success) {
-        setIsAdmin(true);
-        setAdminView("dashboard");
-        showToastMessage("Admin mode activated 🔐", "success");
-      } else {
+     if (response.ok && data.success) {
+  localStorage.setItem("eloria_admin_token", data.token);
+
+  setIsAdmin(true);
+  setAdminView("dashboard");
+
+  showToastMessage("Admin mode activated 🔐", "success");
+}else {
         showToastMessage(data.message || "Wrong password ❌", "error");
       }
     } catch (error) {
