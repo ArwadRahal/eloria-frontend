@@ -574,6 +574,7 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
       });
 
       const data = await response.json();
+console.log(data);
 
      if (response.ok && data.success) {
   localStorage.setItem("eloria_admin_token", data.token);
