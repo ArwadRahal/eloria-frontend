@@ -753,9 +753,10 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
       if (newProductImage3) formData.append("image3", newProductImage3);
 
       const response = await fetch(`${API_URL}/products`, {
-        method: "POST",
-        body: formData
-      });
+  method: "POST",
+  headers: getAdminHeaders(),
+  body: formData
+});
 
       const data = await response.json();
 
