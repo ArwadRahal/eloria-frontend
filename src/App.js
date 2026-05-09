@@ -961,14 +961,12 @@ setPreviewImages({
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
-        method: "PUT",
-        headers: {
-    "Content-Type": "application/json"
-  },
-        body: JSON.stringify({
-          status: newStatus
-        })
-      });
+  method: "PUT",
+  headers: getAdminJsonHeaders(),
+  body: JSON.stringify({
+    status: newStatus
+  })
+});
 
       const data = await response.json();
 
@@ -1000,9 +998,9 @@ setPreviewImages({
 
     try {
       const response = await fetch(`${API_URL}/orders/${orderId}`, {
-        method: "DELETE"
-      });
-
+  method: "DELETE",
+  headers: getAdminHeaders()
+});
       if (response.ok) {
         showToastMessage("Order deleted successfully 🗑️", "success");
         fetchOrders();
