@@ -959,60 +959,62 @@ setPreviewImages({
   };
 
   const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
-  method: "PUT",
-  headers: getAdminJsonHeaders(),
-  body: JSON.stringify({
-    status: newStatus
-  })
-});
+  try {
+    const response = await fetch(`${API_URL}/orders/${orderId}/status`, {
+      method: "PUT",
+      headers: getAdminJsonHeaders(),
+      body: JSON.stringify({
+        status: newStatus
+      })
+    });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      if (response.ok) {
-        showToastMessage("Order status updated successfully!", "success");
-        fetchOrders();
-        fetchProducts();
-      } else {
-        showToastMessage(
-          data.error || "Failed to update order status.",
-          "error"
-        );
-      }
-    } catch (error) {
-      console.log("Error updating order status:", error);
+    if (response.ok) {
+      showToastMessage("Order status updated successfully!", "success");
+      fetchOrders();
+      fetchProducts();
+    } else {
       showToastMessage(
-        "Something went wrong while updating the order status.",
+        data.error || "Failed to update order status.",
         "error"
       );
     }
-  };
-
-  const deleteOrder = async (orderId) => {
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this order?"
+  } catch (error) {
+    console.log("Error updating order status:", error);
+    showToastMessage(
+      "Something went wrong while updating the order status.",
+      "error"
     );
+  }
+};
+const deleteOrder = async (orderId) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this order?"
+  );
 
-    if (!confirmDelete) return;
+  if (!confirmDelete) return;
 
-    try {
-      const response = await fetch(`${API_URL}/orders/${orderId}`, {
-  method: "DELETE",
-  headers: getAdminHeaders()
-});
-      if (response.ok) {
-        showToastMessage("Order deleted successfully 🗑️", "success");
-        fetchOrders();
-        fetchProducts();
-      } else {
-        showToastMessage("Failed to delete order", "error");
-      }
-    } catch (error) {
-      console.log(error);
-      showToastMessage("Error deleting order", "error");
+  try {
+    const response = await fetch(`${API_URL}/orders/${orderId}`, {
+      method: "DELETE",
+      headers: getAdminHeaders()
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showToastMessage("Order deleted successfully 🗑️", "success");
+      fetchOrders();
+      fetchProducts();
+    } else {
+      showToastMessage(data.error || "Failed to delete order", "error");
     }
-  };
+  } catch (error) {
+    console.log(error);
+    showToastMessage("Error deleting order", "error");
+  }
+};
 
   const copyToClipboard = (text) => {
     navigator.clipboard.writeText(text);
