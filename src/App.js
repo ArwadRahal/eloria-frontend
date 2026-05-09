@@ -815,9 +815,10 @@ setPreviewImages({
     if (editProductImage3) formData.append("image3", editProductImage3);
 
     const response = await fetch(`${API_URL}/products/${editingProduct.id}`, {
-      method: "PUT",
-      body: formData
-    });
+  method: "PUT",
+  headers: getAdminHeaders(),
+  body: formData
+});
 
     const text = await response.text();
 
@@ -852,8 +853,9 @@ setPreviewImages({
 
     try {
       const response = await fetch(`${API_URL}/products/${productId}`, {
-        method: "DELETE"
-      });
+  method: "DELETE",
+  headers: getAdminHeaders()
+});
 
       const data = await response.json();
 
