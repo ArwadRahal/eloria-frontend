@@ -66,7 +66,7 @@ function App() {
 const [language, setLanguage] = useState("en");
   const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState("");
-
+const ADMIN_TIMEOUT = 5 * 60 * 1000;
 const isArabic = language === "ar";
 const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
 const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
@@ -598,7 +598,39 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
     setEditingProduct(null);
     showToastMessage("Logged out from admin", "success");
   };
+useEffect(() => {
+  if (!isAdmin) return;
 
+  let timeoutId;
+
+  const resetAdminTimer = () => {
+    clearTimeout(timeoutId);
+
+    timeoutId = setTimeout(() => {
+      localStorage.removeItem("eloria_admin_token");
+      setIsAdmin(false);
+      setAdminView("dashboard");
+      setShowEditPopup(false);
+      setEditingProduct(null);
+      showToastMessage("Admin session expired. Please login again.", "error");
+    }, ADMIN_TIMEOUT);
+  };
+
+  resetAdminTimer();
+
+  window.addEventListener("mousemove", resetAdminTimer);
+  window.addEventListener("keydown", resetAdminTimer);
+  window.addEventListener("click", resetAdminTimer);
+  window.addEventListener("scroll", resetAdminTimer);
+
+  return () => {
+    clearTimeout(timeoutId);
+    window.removeEventListener("mousemove", resetAdminTimer);
+    window.removeEventListener("keydown", resetAdminTimer);
+    window.removeEventListener("click", resetAdminTimer);
+    window.removeEventListener("scroll", resetAdminTimer);
+  };
+}, [isAdmin]);
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
 
