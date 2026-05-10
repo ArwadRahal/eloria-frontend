@@ -17,17 +17,19 @@ import AdminProducts from "./components/admin/AdminProducts";
 import AdminCategories from "./components/admin/AdminCategories";
 import AddProductForm from "./components/admin/AddProductForm";
 import EditProductPopup from "./components/admin/EditProductPopup";
-
-
+import API_URL from "./services/api";
+import {getAdminHeaders,getAdminJsonHeaders,adminLogin} from "./services/adminApi";
+import {
+  fetchProducts as fetchProductsRequest,
+  fetchCategories as fetchCategoriesRequest,
+  deleteProductRequest
+} from "./services/productApi";
 function App() {
-  const API_URL =
-    process.env.REACT_APP_API_URL || "https://eloria-backend.onrender.com";
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
   const navIsDraggingRef = useRef(false);
   const navStartXRef = useRef(0);
   const navScrollLeftRef = useRef(0);
-
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -43,23 +45,17 @@ function App() {
   const [adminStatusFilter, setAdminStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [isSubmittingOrder, setIsSubmittingOrder] = useState(false);
-
   const [adminView, setAdminView] = useState("dashboard");
   const [showEditPopup, setShowEditPopup] = useState(false);
-
   const [newProductImage, setNewProductImage] = useState(null);
   const [newProductImage2, setNewProductImage2] = useState(null);
   const [newProductImage3, setNewProductImage3] = useState(null);
-
   const [editProductImage, setEditProductImage] = useState(null);
   const [editProductImage2, setEditProductImage2] = useState(null);
   const [editProductImage3, setEditProductImage3] = useState(null);
-
   const [editingProduct, setEditingProduct] = useState(null);
-
   const [adminProductSearch, setAdminProductSearch] = useState("");
   const [adminStockFilter, setAdminStockFilter] = useState("all");
-
   const [favorites, setFavorites] = useState([]);
   const [showFavorites, setShowFavorites] = useState(false);
   const [page, setPage] = useState("home");
@@ -71,126 +67,57 @@ const isArabic = language === "ar";
 const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
 const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
 const CART_STORAGE_KEY = "eloria_cart_v1";
-
-const getAdminHeaders = () => {
-  const token = localStorage.getItem("eloria_admin_token");
-
-  return {
-    "x-admin-token": token || ""
-  };
-};
-
-const getAdminJsonHeaders = () => {
-  const token = localStorage.getItem("eloria_admin_token");
-
-  return {
-    "Content-Type": "application/json",
-    "x-admin-token": token || ""
-  };
-};
-
 const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
-
-  if (url.startsWith("blob:") || url.startsWith("data:")) {
-    return url;
-  }
-
+  if (url.startsWith("blob:") || url.startsWith("data:")) { return url;}
   if (url.startsWith("http://")) {
-    return url.replace("http://", "https://");
-  }
-
+    return url.replace("http://", "https://"); }
   if (url.startsWith("/uploads/")) {
-    return `${API_URL}${url}`;
-  }
-
-  return url;
-};
-
+    return `${API_URL}${url}`;}return url;};
 const getProductImages = (product) => {
-  const images = [
-    product?.image_url,
-    product?.image_url_2,
-    product?.image_url_3
-  ]
-    .filter(Boolean)
-    .map(getImageUrl);
-
-  return images.length > 0 ? images : [defaultProductImage];
-};
-
+  const images = [product?.image_url,product?.image_url_2,product?.image_url_3 ]
+    .filter(Boolean) .map(getImageUrl);
+  return images.length > 0 ? images : [defaultProductImage];};
 const getBaseProductName = (name = "") => {
   return name
     .replace(/\s+[–—-]\s+[^–—-]+$/, "")
     .trim()
-    .toLowerCase();
-};
-
+    .toLowerCase();};
 const getDisplayProductName = (name = "") => {
-  return name.replace(/\s+[–—-]\s+[^–—-]+$/, "").trim();
-};
-
+  return name.replace(/\s+[–—-]\s+[^–—-]+$/, "").trim();};
 const getShadeName = (name = "") => {
   const parts = name.split(/\s+[–—-]\s+/);
-  return parts.length > 1 ? parts[parts.length - 1].trim() : "";
-};
-
+  return parts.length > 1 ? parts[parts.length - 1].trim() : "";};
 const getProductVariants = (product) => {
   if (!product?.name) return [];
-
   const baseName = getBaseProductName(product.name);
-
   return products.filter(
     (item) =>
       item.id !== product.id &&
       String(item.category_id) === String(product.category_id) &&
-      getBaseProductName(item.name) === baseName
-  );
-};
-
-const getAllProductVariants = (product) => {
-  if (!product?.name) return [];
-
+      getBaseProductName(item.name) === baseName );};
+const getAllProductVariants = (product) => {if (!product?.name) return [];
   const variants = [product, ...getProductVariants(product)];
-
-  return variants.sort((a, b) => a.name.localeCompare(b.name));
-};
-
+  return variants.sort((a, b) => a.name.localeCompare(b.name));};
 const getProductGroupKey = (product) => {
-  return `${product?.category_id || ""}-${getBaseProductName(product?.name || "")}`;
-};
-
+  return `${product?.category_id || ""}-${getBaseProductName(product?.name || "")}`;};
 const getRepresentativeProducts = (items = []) => {
   const seenGroups = new Set();
-
   return items.filter((product) => {
     const groupKey = getProductGroupKey(product);
-
     if (seenGroups.has(groupKey)) return false;
-
     seenGroups.add(groupKey);
-    return true;
-  });
-};
-
+    return true;  });};
 const [previewImages, setPreviewImages] = useState({
-  image: null,
-  image2: null,
-  image3: null
-});
-
+  image: null,image2:null,image3: null});
 const handleImagePreview = (e, field) => {
   const file = e.target.files[0];
-
   if (!file) return;
-
   const previewURL = URL.createObjectURL(file);
-
   setPreviewImages((prev) => ({
     ...prev,
     [field]: previewURL
   }));
-
   if (field === "image") setNewProductImage(file);
   if (field === "image2") setNewProductImage2(file);
   if (field === "image3") setNewProductImage3(file);
@@ -319,15 +246,12 @@ const t = {
         setCategories(JSON.parse(cachedCategories));
       }
 
-      const res = await fetch(`${API_URL}/categories`);
-      const data = await res.json();
+      const data = await fetchCategoriesRequest();
       const safeCategories = Array.isArray(data) ? data : [];
 
       setCategories(safeCategories);
       sessionStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(safeCategories));
     } catch (err) {
-      console.log(err);
-
       const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
       if (cachedCategories) {
         setCategories(JSON.parse(cachedCategories));
@@ -362,8 +286,7 @@ const t = {
         showToastMessage(data.error || "Failed to add category.", "error");
       }
     } catch (err) {
-      console.log(err);
-      showToastMessage("Error adding category.", "error");
+           showToastMessage("Error adding category.", "error");
     }
   };
 
@@ -406,7 +329,6 @@ const t = {
         showToastMessage(data.error || "Failed to delete category.", "error");
       }
     } catch (err) {
-      console.log(err);
       showToastMessage("Error deleting category.", "error");
     }
   };
@@ -422,15 +344,12 @@ const t = {
         setLoading(true);
       }
 
-      const res = await fetch(`${API_URL}/products`);
-      const data = await res.json();
+      const data = await fetchProductsRequest();
       const safeProducts = Array.isArray(data) ? data : [];
 
       setProducts(safeProducts);
       sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(safeProducts));
     } catch (err) {
-      console.log(err);
-
       const cachedProducts = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
       if (cachedProducts) {
         setProducts(JSON.parse(cachedProducts));
@@ -446,10 +365,17 @@ const t = {
     try {
 const res = await fetch(`${API_URL}/orders-with-items`, {
   headers: getAdminHeaders()
-});      const data = await res.json();
+});
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("eloria_admin_token");
+        setIsAdmin(false);
+        setOrders([]);
+        showToastMessage("Admin session expired. Please login again.", "error");
+        return;
+      }
+      const data = await res.json();
       setOrders(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.log(err);
       setOrders([]);
     }
   };
@@ -494,7 +420,6 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
           setCart(parsedCart);
         }
       } catch (err) {
-        console.log("Cart restore error:", err);
       }
     }
   }, []);
@@ -565,33 +490,17 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
     if (password === null) return;
 
     try {
-      const response = await fetch(`${API_URL}/admin-login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ password })
-      });
-
+     const response = await adminLogin(password);
       const data = await response.json();
-
      if (response.ok && data.success) {
   localStorage.setItem("eloria_admin_token", data.token);
-
   setIsAdmin(true);
   setAdminView("dashboard");
-
   showToastMessage("Admin mode activated 🔐", "success");
-}else {
-        showToastMessage(data.message || "Wrong password ❌", "error");
-      }
-    } catch (error) {
-      console.log("Admin login error:", error);
-      showToastMessage("Admin login failed. Try again.", "error");
-    }
-  }
-};
+}else {showToastMessage(data.message || "Wrong password ❌", "error"); }}
+catch (error) {showToastMessage("Admin login failed. Try again.", "error");}  }};
   const handleAdminLogout = () => {
+    localStorage.removeItem("eloria_admin_token");
     setIsAdmin(false);
     setAdminView("dashboard");
     setShowEditPopup(false);
@@ -600,12 +509,9 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
   };
 useEffect(() => {
   if (!isAdmin) return;
-
   let timeoutId;
-
   const resetAdminTimer = () => {
     clearTimeout(timeoutId);
-
     timeoutId = setTimeout(() => {
       localStorage.removeItem("eloria_admin_token");
       setIsAdmin(false);
@@ -615,14 +521,11 @@ useEffect(() => {
       showToastMessage("Admin session expired. Please login again.", "error");
     }, ADMIN_TIMEOUT);
   };
-
   resetAdminTimer();
-
   window.addEventListener("mousemove", resetAdminTimer);
   window.addEventListener("keydown", resetAdminTimer);
   window.addEventListener("click", resetAdminTimer);
   window.addEventListener("scroll", resetAdminTimer);
-
   return () => {
     clearTimeout(timeoutId);
     window.removeEventListener("mousemove", resetAdminTimer);
@@ -633,48 +536,35 @@ useEffect(() => {
 }, [isAdmin]);
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
-
     if (existingProduct) {
       if (existingProduct.quantity >= product.stock) {
         showToastMessage("No more stock available ⚠️", "error");
         return;
       }
-
       const updatedCart = cart.map((item) =>
         item.id === product.id
           ? { ...item, quantity: item.quantity + 1 }
           : item
       );
-
       setCart(updatedCart);
       showToastMessage(`${product.name} added to cart 🛒`, "success");
     } else {
       if (product.stock > 0) {
         setCart([...cart, { ...product, quantity: 1 }]);
-        showToastMessage(`${product.name} added to cart 🛒`, "success");
-      }
-    }
-  };
-
+        showToastMessage(`${product.name} added to cart 🛒`, "success"); }}  };
   const removeFromCart = (productId) => {
     const removedItem = cart.find((item) => item.id === productId);
     const updatedCart = cart.filter((item) => item.id !== productId);
     setCart(updatedCart);
-
     if (removedItem) {
-      showToastMessage(`${removedItem.name} removed from cart`, "error");
-    }
-  };
-
+      showToastMessage(`${removedItem.name} removed from cart`, "error"); } };
   const increaseQuantity = (productId) => {
     let updatedItemName = "";
-
     const updatedCart = cart.map((item) => {
       if (item.id === productId) {
         const productInStock = products.find(
           (product) => product.id === productId
         );
-
         if (productInStock && item.quantity < productInStock.stock) {
           updatedItemName = item.name;
           return { ...item, quantity: item.quantity + 1 };
@@ -819,7 +709,6 @@ setPreviewImages({
         showToastMessage(data.error || "Failed to add product.", "error");
       }
     } catch (error) {
-      console.log(error);
       showToastMessage("Error adding product.", "error");
     }
   };
@@ -867,11 +756,9 @@ setPreviewImages({
       setEditingProduct(null);
       fetchProducts();
     } else {
-      console.log("Update error details:", data);
       showToastMessage(data.details || data.error || "Update failed ❌", "error");
     }
   } catch (err) {
-    console.log(err);
     showToastMessage("Error updating product ❌", "error");
   }
 };
@@ -884,10 +771,7 @@ setPreviewImages({
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(`${API_URL}/products/${productId}`, {
-  method: "DELETE",
-  headers: getAdminHeaders()
-});
+      const response = await deleteProductRequest(productId);
 
       const data = await response.json();
 
@@ -898,7 +782,6 @@ setPreviewImages({
         showToastMessage(data.error || "Failed to delete product.", "error");
       }
     } catch (error) {
-      console.log(error);
       showToastMessage("Error deleting product.", "error");
     }
   };
@@ -913,8 +796,8 @@ setPreviewImages({
 
     if (!customerInfo.phone.trim()) {
       errors.phone = "Phone number is required";
-    } else if (normalizedPhone.length < 7) {
-      errors.phone = "Please enter a valid phone number";
+    } else if (!/^05\d{8}$/.test(normalizedPhone)) {
+      errors.phone = "Phone number must start with 05 and contain 10 digits";
     }
 
     if (!customerInfo.city.trim()) {
@@ -980,7 +863,6 @@ setPreviewImages({
         showToastMessage(data.error || "Failed to place order.", "error");
       }
     } catch (error) {
-      console.log("Error sending order:", error);
       showToastMessage(
         "Something went wrong while sending the order.",
         "error"
@@ -1013,7 +895,6 @@ setPreviewImages({
       );
     }
   } catch (error) {
-    console.log("Error updating order status:", error);
     showToastMessage(
       "Something went wrong while updating the order status.",
       "error"
@@ -1043,7 +924,6 @@ const deleteOrder = async (orderId) => {
       showToastMessage(data.error || "Failed to delete order", "error");
     }
   } catch (error) {
-    console.log(error);
     showToastMessage("Error deleting order", "error");
   }
 };
@@ -1234,7 +1114,7 @@ const renderProductDetails = () => {
   const isCheckoutValid =
     cart.length > 0 &&
     customerInfo.fullName.trim() &&
-    normalizedCheckoutPhone.length >= 7 &&
+    /^05\d{8}$/.test(normalizedCheckoutPhone) &&
     customerInfo.city.trim() &&
     customerInfo.address.trim();
 
