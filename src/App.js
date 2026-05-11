@@ -215,6 +215,8 @@ const t = {
     price: "",
     stock: "",
     category_id: "1",
+    description_en: "",
+description_ar: "",
     image_url: "",
     image_url_2: "",
     image_url_3: ""
@@ -677,7 +679,8 @@ useEffect(() => {
       formData.append("price", newProduct.price);
       formData.append("stock", newProduct.stock);
       formData.append("category_id", newProduct.category_id);
-
+formData.append("description_en", newProduct.description_en);
+formData.append("description_ar", newProduct.description_ar);
       if (newProductImage) formData.append("image", newProductImage);
       if (newProductImage2) formData.append("image2", newProductImage2);
       if (newProductImage3) formData.append("image3", newProductImage3);
@@ -698,6 +701,8 @@ useEffect(() => {
           price: "",
           stock: "",
           category_id: "1",
+          description_en: "",
+description_ar: "",
           image_url: "",
           image_url_2: "",
           image_url_3: ""

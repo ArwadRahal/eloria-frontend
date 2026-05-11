@@ -45,7 +45,21 @@ function AddProductForm({
           </option>
         ))}
       </select>
+<label>Description EN</label>
+<textarea
+  name="description_en"
+  placeholder="Product description in English"
+  value={newProduct.description_en}
+  onChange={handleNewProductChange}
+/>
 
+<label>Description AR</label>
+<textarea
+  name="description_ar"
+  placeholder="وصف المنتج بالعربي"
+  value={newProduct.description_ar}
+  onChange={handleNewProductChange}
+/>
       <label>Main Image</label>
       <input
         type="file"
