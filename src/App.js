@@ -1072,25 +1072,36 @@ const deleteOrder = async (orderId) => {
   ).length;
 
 
- 
+ const isNewProduct = (product) => {
+  if (!product?.created_at) return false;
+
+  const createdDate = new Date(product.created_at);
+  const today = new Date();
+
+  const diffTime = today - createdDate;
+  const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+  return diffDays <= 7;
+};
 const renderStoreProductCard = (product) => {
   return (
     <ProductCard
-      key={product.id}
-      product={product}
-      products={products}
-      API_URL={API_URL}
-      hoveredVariantByProductId={hoveredVariantByProductId}
-      setHoveredVariantByProductId={setHoveredVariantByProductId}
-      isFavorite={isFavorite}
-      toggleFavorite={toggleFavorite}
-      addToCart={addToCart}
-      setSelectedProduct={setSelectedProduct}
-      setSelectedImage={setSelectedImage}
-      setPage={setPage}
-      t={t}
-      language={language}
-    />
+  key={product.id}
+  product={product}
+  products={products}
+  API_URL={API_URL}
+  hoveredVariantByProductId={hoveredVariantByProductId}
+  setHoveredVariantByProductId={setHoveredVariantByProductId}
+  isFavorite={isFavorite}
+  toggleFavorite={toggleFavorite}
+  addToCart={addToCart}
+  setSelectedProduct={setSelectedProduct}
+  setSelectedImage={setSelectedImage}
+  setPage={setPage}
+  t={t}
+  language={language}
+  isNewProduct={isNewProduct(product)}
+/>
   );
 };
 

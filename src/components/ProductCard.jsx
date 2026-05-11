@@ -18,12 +18,11 @@ function ProductCard({
   setSelectedProduct,
   setSelectedImage,
   setPage,
-  t,
+  t,isNewProduct,
   language
 }) {
   const variantProducts = getAllProductVariants(product, products);
   const hoveredVariantId = hoveredVariantByProductId[product.id];
-
   const previewProduct =
     variantProducts.find(
       (variant) => String(variant.id) === String(hoveredVariantId)
@@ -64,6 +63,11 @@ function ProductCard({
       </button>
 
       <div className="product-image-wrap">
+        {isNewProduct && (
+  <div className="new-badge">
+    NEW
+  </div>
+)}
     <img
   src={getImageUrl(previewProduct.image_url, API_URL)}
   alt={previewProduct.name}
