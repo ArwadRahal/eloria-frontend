@@ -471,8 +471,7 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
 
     return foundCategory ? foundCategory.name : "Unknown";
   };
-
-  const handleHiddenAdminEntry = async () => {
+const handleHiddenAdminEntry = async () => {
   logoClickCountRef.current += 1;
 
   if (logoClickTimerRef.current) {
@@ -490,15 +489,24 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
     if (password === null) return;
 
     try {
-     const response = await adminLogin(password);
+      const response = await adminLogin(password);
       const data = await response.json();
-     if (response.ok && data.success) {
-  localStorage.setItem("eloria_admin_token", data.token);
-  setIsAdmin(true);
-  setAdminView("dashboard");
-  showToastMessage("Admin mode activated 🔐", "success");
-}else {showToastMessage(data.message || "Wrong password ❌", "error"); }}
-catch (error) {showToastMessage("Admin login failed. Try again.", "error");}  }};
+
+      if (response.ok && data.success) {
+        localStorage.setItem("eloria_admin_token", data.token);
+
+        setIsAdmin(true);
+        setAdminView("dashboard");
+
+        showToastMessage("Admin mode activated 🔐", "success");
+      } else {
+        showToastMessage(data.message || "Wrong password ❌", "error");
+      }
+    } catch (error) {
+      showToastMessage("Admin login failed. Try again.", "error");
+    }
+  }
+};
   const handleAdminLogout = () => {
     localStorage.removeItem("eloria_admin_token");
     setIsAdmin(false);
@@ -1496,5 +1504,4 @@ const renderProductDetails = () => {
     </div>
   );
 }
-
 export default App;
