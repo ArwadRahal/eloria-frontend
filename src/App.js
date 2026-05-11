@@ -1108,23 +1108,24 @@ const renderStoreProductCard = (product) => {
 const renderProductDetails = () => {
   return (
     <ProductDetails
-      selectedProduct={selectedProduct}
-      selectedImage={selectedImage}
-      setSelectedProduct={setSelectedProduct}
-      setSelectedImage={setSelectedImage}
-      setPage={setPage}
-      uniqueProducts={uniqueProducts}
-      products={products}
-      API_URL={API_URL}
-      getCategoryName={getCategoryName}
-      addToCart={addToCart}
-      isFavorite={isFavorite}
-      toggleFavorite={toggleFavorite}
-      hoveredVariantByProductId={hoveredVariantByProductId}
-      setHoveredVariantByProductId={setHoveredVariantByProductId}
-      t={t}
-      language={language}
-    />
+  selectedProduct={selectedProduct}
+  selectedImage={selectedImage}
+  setSelectedProduct={setSelectedProduct}
+  setSelectedImage={setSelectedImage}
+  setPage={setPage}
+  uniqueProducts={uniqueProducts}
+  products={products}
+  API_URL={API_URL}
+  getCategoryName={getCategoryName}
+  addToCart={addToCart}
+  isFavorite={isFavorite}
+  toggleFavorite={toggleFavorite}
+  hoveredVariantByProductId={hoveredVariantByProductId}
+  setHoveredVariantByProductId={setHoveredVariantByProductId}
+  isNewProduct={isNewProduct}
+  t={t}
+  language={language}
+/>
   );
 };
 
