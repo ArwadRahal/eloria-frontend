@@ -23,6 +23,7 @@ function ProductDetails({
   toggleFavorite,
   hoveredVariantByProductId,
   setHoveredVariantByProductId,
+  isNewProduct,
   t,
   language
 }) {
