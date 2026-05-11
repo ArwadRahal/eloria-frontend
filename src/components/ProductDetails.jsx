@@ -107,11 +107,7 @@ function ProductDetails({
                 e.target.src = defaultProductImage;
               }}
             />
-{isNewProduct(selectedProduct) && (
-  <div className="details-new-badge">
-    {language === "ar" ? "جديد" : "NEW"}
-  </div>
-)}
+
             {galleryImages.length > 1 && (
               <button
                 className="image-arrow image-arrow-right"
@@ -153,15 +149,15 @@ function ProductDetails({
           </div>
         </div>
 
-        <div className="product-details-info">
-          <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
-          <h1>{getDisplayProductName(selectedProduct.name)}</h1>
+       <div className="product-details-info">
+  {isNewProduct(selectedProduct) && (
+    <div className="details-new-badge">
+      {language === "ar" ? "جديد" : "NEW"}
+    </div>
+  )}
 
-          <p className="product-details-shade">
-            {getShadeName(selectedProduct.name)
-              ? `Shade: ${getShadeName(selectedProduct.name)}`
-              : "Soft ELORIA beauty pick"}
-          </p>
+  <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
+  <h1>{getDisplayProductName(selectedProduct.name)}</h1>
 
           {getAllProductVariants(selectedProduct, products).length > 1 && (
             <div className="details-variants-box">
