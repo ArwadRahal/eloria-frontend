@@ -192,11 +192,13 @@ function ProductDetails({
             </div>
           )}
 
-          <p className="product-details-description">
-            A beautiful ELORIA pick designed to add a soft, elegant touch to
-            your makeup collection. Browse the gallery, check availability,
-            and add it to your bag when you are ready.
-          </p>
+         <p className="product-details-description">
+  {language === "ar"
+    ? selectedProduct.description_ar ||
+      "منتج مميز من ELORIA بلمسة ناعمة وأنيقة."
+    : selectedProduct.description_en ||
+      "A beautiful ELORIA pick designed to add a soft elegant touch."}
+</p>
 
           <div className="product-details-price-row">
             <span className="product-details-price">{selectedProduct.price} ₪</span>
