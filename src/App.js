@@ -651,6 +651,8 @@ useEffect(() => {
     setEditingProduct({
       ...product,
       category_id: String(product.category_id || "1"),
+      description_en: product.description_en || "",
+description_ar: product.description_ar || "",
       image_url: product.image_url || "",
       image_url_2: product.image_url_2 || "",
       image_url_3: product.image_url_3 || ""
@@ -739,11 +741,11 @@ setPreviewImages({
     formData.append("price", editingProduct.price);
     formData.append("stock", editingProduct.stock);
     formData.append("category_id", editingProduct.category_id);
-
+formData.append("description_en", editingProduct.description_en || "");
+formData.append("description_ar", editingProduct.description_ar || "");
     formData.append("image_url", editingProduct.image_url || "");
     formData.append("image_url_2", editingProduct.image_url_2 || "");
     formData.append("image_url_3", editingProduct.image_url_3 || "");
-
     if (editProductImage) formData.append("image", editProductImage);
     if (editProductImage2) formData.append("image2", editProductImage2);
     if (editProductImage3) formData.append("image3", editProductImage3);

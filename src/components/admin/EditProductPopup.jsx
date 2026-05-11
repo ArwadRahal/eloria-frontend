@@ -64,7 +64,21 @@ function EditProductPopup({
             </option>
           ))}
         </select>
+<label>Description EN</label>
+<textarea
+  name="description_en"
+  placeholder="Product description in English"
+  value={editingProduct.description_en || ""}
+  onChange={handleEditChange}
+/>
 
+<label>Description AR</label>
+<textarea
+  name="description_ar"
+  placeholder="وصف المنتج بالعربي"
+  value={editingProduct.description_ar || ""}
+  onChange={handleEditChange}
+/>
         <label>Main Image</label>
         <input
           type="file"
