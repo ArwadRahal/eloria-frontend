@@ -106,7 +106,11 @@ function ProductDetails({
                 e.target.src = defaultProductImage;
               }}
             />
-
+{isNewProduct(selectedProduct) && (
+  <div className="details-new-badge">
+    {language === "ar" ? "جديد" : "NEW"}
+  </div>
+)}
             {galleryImages.length > 1 && (
               <button
                 className="image-arrow image-arrow-right"
