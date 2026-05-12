@@ -651,7 +651,9 @@ useEffect(() => {
   const handleEditProduct = (product) => {
     setEditingProduct({
       ...product,
+
       category_id: String(product.category_id || "1"),
+      name_ar: product.name_ar || "",
       description_en: product.description_en || "",
 description_ar: product.description_ar || "",
       image_url: product.image_url || "",

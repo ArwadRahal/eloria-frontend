@@ -65,7 +65,7 @@ function ProductCard({
       <div className="product-image-wrap">
         {isNewProduct && (
   <div className="new-badge">
-    NEW
+    {language === "ar" ? "جديد" : "NEW"}
   </div>
 )}
     <img
@@ -82,7 +82,7 @@ function ProductCard({
       </div>
 
       <div className="product-card-body">
-        <h3>{getDisplayProductName(product.name)}</h3>
+        <h3>{getDisplayProductName(product, language)}</h3>
 
         {variantProducts.length > 1 && (
           <div className="product-variants-preview">
@@ -126,8 +126,7 @@ function ProductCard({
             </div>
 
             <span className="variants-count">
-              {variantProducts.length} shades available
-            </span>
+{variantProducts.length} shades available            </span>
           </div>
         )}
 

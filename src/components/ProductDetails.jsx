@@ -157,8 +157,7 @@ function ProductDetails({
   )}
 
   <p className="section-tag">{getCategoryName(selectedProduct.category_id)}</p>
-  <h1>{getDisplayProductName(selectedProduct.name)}</h1>
-
+<h1>{getDisplayProductName(selectedProduct, language)}</h1>
           {getAllProductVariants(selectedProduct, products).length > 1 && (
             <div className="details-variants-box">
               <p>Choose shade</p>

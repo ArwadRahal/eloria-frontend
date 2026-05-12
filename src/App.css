@@ -6125,3 +6125,46 @@ button:disabled {
   font-weight: 700;
   letter-spacing: 1px;
 }
+.edit-product-modern {
+  width: min(900px, 95vw);
+  max-height: 90vh;
+  overflow-y: auto;
+  border-radius: 28px;
+  padding: 32px;
+}
+
+.admin-form-section {
+  background: #fff;
+  border: 1px solid #f3d6e2;
+  border-radius: 22px;
+  padding: 20px;
+  margin-bottom: 22px;
+}
+
+.admin-form-section h4 {
+  margin-bottom: 18px;
+  color: #d4578c;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.admin-form-section textarea {
+  width: 100%;
+  min-height: 120px;
+  resize: vertical;
+  border-radius: 16px;
+  border: 1px solid #f0c8d8;
+  padding: 14px;
+  font-size: 15px;
+  margin-bottom: 14px;
+  font-family: inherit;
+}
+
+.admin-form-section input,
+.admin-form-section select {
+  margin-bottom: 14px;
+}
+
+.edit-popup-box {
+  scrollbar-width: thin;
+}
