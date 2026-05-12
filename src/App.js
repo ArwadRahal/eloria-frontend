@@ -164,7 +164,19 @@ const t = {
     checkout: "Customer Information",
     finalTitle: "Thank you for visiting ELORIA 💕",
     finalText: "We hope you find your next beauty favorite with us.",
-    footer: "ELORIA © 2026 — Beauty with a soft elegant touch ✨"
+    footer: "ELORIA © 2026 — Beauty with a soft elegant touch ✨",
+    newArrivalsTag: "NEW ARRIVALS",
+    freshBeautyPicks: "Fresh beauty picks",
+    viewAllProducts: "View all products",
+    softBeautyPicksTag: "SOFT BEAUTY PICKS",
+    everydayGlow: "Made for your everyday glow",
+    shopCollection: "Shop collection",
+    youMayAlsoLoveTag: "YOU MAY ALSO LOVE",
+    moreFavorites: "A few more ELORIA favorites",
+    continueShopping: "Continue shopping",
+    shopHeroTag: "SHOP ELORIA",
+    shopHeroTitle: "Explore the full collection",
+    shopHeroText: "Browse all products, search by name, or choose a category from the top menu."
   },
   ar: {
     heroBadge: "إلوريا بيوتي",
@@ -207,7 +219,19 @@ const t = {
     checkout: "معلومات الزبونة",
     finalTitle: "شكرًا لزيارتك ELORIA 💕",
     finalText: "نتمنى أن تجدي معنا منتجك المفضل القادم.",
-    footer: "ELORIA © 2026 — جمال ناعم بلمسة أنيقة ✨"
+    footer: "ELORIA © 2026 — جمال ناعم بلمسة أنيقة ✨",
+    newArrivalsTag: "وصل حديثًا",
+    freshBeautyPicks: "اختيارات جمال جديدة",
+    viewAllProducts: "عرض كل المنتجات",
+    softBeautyPicksTag: "اختيارات ناعمة",
+    everydayGlow: "لإطلالة يومية ناعمة",
+    shopCollection: "تسوقي المجموعة",
+    youMayAlsoLoveTag: "قد يعجبك أيضًا",
+    moreFavorites: "المزيد من مفضلات ELORIA",
+    continueShopping: "متابعة التسوق",
+    shopHeroTag: "تسوّقي ELORIA",
+    shopHeroTitle: "استكشفي المجموعة كاملة",
+    shopHeroText: "تصفحي كل المنتجات، ابحثي بالاسم، أو اختاري فئة من القائمة العلوية."
   }
 };
   const [newProduct, setNewProduct] = useState({
@@ -742,6 +766,7 @@ setPreviewImages({
     const formData = new FormData();
 
     formData.append("name", editingProduct.name);
+    formData.append("name_ar", editingProduct.name_ar || "");
     formData.append("price", editingProduct.price);
     formData.append("stock", editingProduct.stock);
     formData.append("category_id", editingProduct.category_id);
@@ -1030,9 +1055,8 @@ const deleteOrder = async (orderId) => {
 
   const filteredProducts = uniqueProducts
     .filter((product) => {
-      const matchesSearch = product.name
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
+      const productSearchText = `${product.name || ""} ${product.name_ar || ""}`.toLowerCase();
+      const matchesSearch = productSearchText.includes(searchTerm.toLowerCase());
 
       const matchesCategory =
         selectedCategory === "all" ||
@@ -1061,9 +1085,8 @@ const deleteOrder = async (orderId) => {
   }, [uniqueProducts]);
 
   const filteredAdminProducts = products.filter((product) => {
-    const matchesSearch = product.name
-      .toLowerCase()
-      .includes(adminProductSearch.toLowerCase());
+    const adminProductSearchText = `${product.name || ""} ${product.name_ar || ""}`.toLowerCase();
+    const matchesSearch = adminProductSearchText.includes(adminProductSearch.toLowerCase());
 
     const matchesStock =
       adminStockFilter === "all" ||
@@ -1324,10 +1347,10 @@ const renderProductDetails = () => {
 
           <section className="home-product-strip">
             <div className="home-strip-header">
-              <p className="section-tag">NEW ARRIVALS</p>
-              <h2>Fresh beauty picks</h2>
+              <p className="section-tag">{t[language].newArrivalsTag}</p>
+              <h2>{t[language].freshBeautyPicks}</h2>
               <button className="view-all-btn" onClick={handleShopNow}>
-                View all products
+                {t[language].viewAllProducts}
               </button>
             </div>
 
@@ -1354,10 +1377,10 @@ const renderProductDetails = () => {
 
           <section className="home-product-strip home-product-strip-alt">
             <div className="home-strip-header">
-              <p className="section-tag">SOFT BEAUTY PICKS</p>
-              <h2>Made for your everyday glow</h2>
+              <p className="section-tag">{t[language].softBeautyPicksTag}</p>
+              <h2>{t[language].everydayGlow}</h2>
               <button className="view-all-btn" onClick={handleShopNow}>
-                Shop collection
+                {t[language].shopCollection}
               </button>
             </div>
 
@@ -1385,10 +1408,10 @@ const renderProductDetails = () => {
 
           <section className="home-product-strip">
             <div className="home-strip-header">
-              <p className="section-tag">YOU MAY ALSO LOVE</p>
-              <h2>A few more ELORIA favorites</h2>
+              <p className="section-tag">{t[language].youMayAlsoLoveTag}</p>
+              <h2>{t[language].moreFavorites}</h2>
               <button className="view-all-btn" onClick={handleShopNow}>
-                Continue shopping
+                {t[language].continueShopping}
               </button>
             </div>
 
@@ -1407,11 +1430,9 @@ const renderProductDetails = () => {
       ) : (
         <main className="shop-page">
           <section className="shop-hero">
-            <p className="section-tag">SHOP ELORIA</p>
-            <h1>Explore the full collection</h1>
-            <p>
-              Browse all products, search by name, or choose a category from the top menu.
-            </p>
+            <p className="section-tag">{t[language].shopHeroTag}</p>
+            <h1>{t[language].shopHeroTitle}</h1>
+            <p>{t[language].shopHeroText}</p>
           </section>
 
           <div className="search-box shop-search-box">
