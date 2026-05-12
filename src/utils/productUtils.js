@@ -5,10 +5,19 @@ export const getBaseProductName = (name = "") => {
     .toLowerCase();
 };
 
-export const getDisplayProductName = (name = "") => {
-  return name.replace(/\s+[–—-]\s+[^–—-]+$/, "").trim();
-};
+export const getDisplayProductName = (
+  product,
+  language = "en"
+) => {
+  const productName =
+    language === "ar"
+      ? product?.name_ar || product?.name || ""
+      : product?.name || "";
 
+  return productName
+    .replace(/\s+[–—-]\s+[^–—-]+$/, "")
+    .trim();
+};
 export const getShadeName = (name = "") => {
   const parts = name.split(/\s+[–—-]\s+/);
   return parts.length > 1 ? parts[parts.length - 1].trim() : "";

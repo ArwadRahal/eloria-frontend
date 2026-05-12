@@ -212,6 +212,7 @@ const t = {
 };
   const [newProduct, setNewProduct] = useState({
     name: "",
+    name_ar: "",
     price: "",
     stock: "",
     category_id: "1",
@@ -678,6 +679,7 @@ description_ar: product.description_ar || "",
     try {
       const formData = new FormData();
       formData.append("name", newProduct.name);
+      formData.append("name_ar", newProduct.name_ar);
       formData.append("price", newProduct.price);
       formData.append("stock", newProduct.stock);
       formData.append("category_id", newProduct.category_id);
@@ -699,7 +701,7 @@ formData.append("description_ar", newProduct.description_ar);
         showToastMessage("Product added successfully ✨", "success");
 
         setNewProduct({
-          name: "",
+          name: "",name_ar: "",
           price: "",
           stock: "",
           category_id: "1",
