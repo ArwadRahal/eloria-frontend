@@ -79,7 +79,7 @@ function ProductDetails({
           }, 50);
         }}
       >
-        ← Continue Shopping
+          {language === "ar" ? "متابعة التسوق ←" : "← Continue Shopping"}
       </button>
 
       <section className="product-details-layout">
@@ -237,8 +237,13 @@ function ProductDetails({
 
       <section className="related-products-section">
         <div className="home-strip-header">
-          <p className="section-tag">RELATED PRODUCTS</p>
-          <h2>You may also like</h2>
+        <p className="section-tag">
+  {language === "ar" ? "منتجات مشابهة" : "RELATED PRODUCTS"}
+</p>
+
+<h2>
+  {language === "ar" ? "قد يعجبك أيضًا" : "You may also like"}
+</h2>
           <button
             className="view-all-btn"
             onClick={() => {
@@ -248,7 +253,7 @@ function ProductDetails({
               }, 50);
             }}
           >
-            View all products
+{language === "ar" ? "عرض كل المنتجات" : "View all products"}
           </button>
         </div>
 
