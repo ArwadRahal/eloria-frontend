@@ -324,14 +324,18 @@ description_ar: "",
 
     if (productsInCategory.length > 0) {
       showToastMessage(
-        `Cannot delete ${category.name}. It has ${productsInCategory.length} products.`,
+        `Cannot delete ${language === "ar"
+  ? category.name_ar || category.name
+  : category.name}. It has ${productsInCategory.length} products.`,
         "error"
       );
       return;
     }
 
     const confirmDelete = window.confirm(
-      `Are you sure you want to delete the category "${category.name}"?`
+      `Are you sure you want to delete the category "${language === "ar"
+  ? category.name_ar || category.name
+  : category.name}"?`
     );
 
     if (!confirmDelete) return;

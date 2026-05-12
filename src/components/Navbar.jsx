@@ -58,7 +58,9 @@ function Navbar({
               }
               onClick={() => handleCategorySelect(String(category.id))}
             >
-              {category.name}
+              {language === "ar"
+  ? category.name_ar || category.name
+  : category.name}
             </button>
           ))}
 
@@ -81,7 +83,9 @@ function Navbar({
               onClick={() => handleCategorySelect(String(category.id))}
               tabIndex="-1"
             >
-              {category.name}
+              {language === "ar"
+  ? category.name_ar || category.name
+  : category.name}
             </button>
           ))}
         </div>

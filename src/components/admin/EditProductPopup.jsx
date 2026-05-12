@@ -97,7 +97,9 @@ function EditProductPopup({
           >
             {categories.map((category) => (
               <option key={category.id} value={category.id}>
-                {category.name}
+                {language === "ar"
+  ? category.name_ar || category.name
+  : category.name}
               </option>
             ))}
           </select>
