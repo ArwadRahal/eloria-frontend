@@ -6168,3 +6168,31 @@ button:disabled {
 .edit-popup-box {
   scrollbar-width: thin;
 }
+
+.add-product-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.add-product-form .admin-form-section {
+  width: 100%;
+}
+
+.admin-form-section label {
+  display: block;
+  margin: 10px 0 6px;
+  font-weight: 700;
+  color: #4a3440;
+}
+
+.admin-form-section input,
+.admin-form-section select,
+.admin-form-section textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.admin-form-section textarea {
+  display: block;
+}
