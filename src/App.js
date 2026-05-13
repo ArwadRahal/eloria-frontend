@@ -62,6 +62,8 @@ function App() {
 const [language, setLanguage] = useState("en");
   const [categories, setCategories] = useState([]);
   const [newCategoryName, setNewCategoryName] = useState("");
+  const [newCategoryNameAr, setNewCategoryNameAr] = useState("");
+const [editingCategory, setEditingCategory] = useState(null);
 const ADMIN_TIMEOUT = 5 * 60 * 1000;
 const isArabic = language === "ar";
 const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
@@ -287,35 +289,69 @@ description_ar: "",
       }
     }
   };
+const handleAddCategory = async () => {
+  const trimmedName = newCategoryName.trim();
+  const trimmedNameAr = newCategoryNameAr.trim();
 
-  const handleAddCategory = async () => {
-    const trimmedName = newCategoryName.trim();
+  if (!trimmedName) {
+    showToastMessage("Please enter category name in English.", "error");
+    return;
+  }
 
-    if (!trimmedName) {
-      showToastMessage("Please enter a category name.", "error");
-      return;
+  try {
+    const response = await fetch(`${API_URL}/categories`, {
+      method: "POST",
+      headers: getAdminJsonHeaders(),
+      body: JSON.stringify({
+        name: trimmedName,
+        name_ar: trimmedNameAr
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      showToastMessage("Category added successfully ✨", "success");
+      setNewCategoryName("");
+      setNewCategoryNameAr("");
+      fetchCategories();
+    } else {
+      showToastMessage(data.error || "Failed to add category.", "error");
     }
+  } catch (err) {
+    showToastMessage("Error adding category.", "error");
+  }
+};
 
-    try {
-      const response = await fetch(`${API_URL}/categories`, {
-        method: "POST",
-        headers: getAdminJsonHeaders(),
-        body: JSON.stringify({ name: trimmedName })
-      });
+const handleUpdateCategory = async (category) => {
+  if (!category.name.trim()) {
+    showToastMessage("Category English name is required.", "error");
+    return;
+  }
 
-      const data = await response.json();
+  try {
+    const response = await fetch(`${API_URL}/categories/${category.id}`, {
+      method: "PUT",
+      headers: getAdminJsonHeaders(),
+      body: JSON.stringify({
+        name: category.name.trim(),
+        name_ar: category.name_ar?.trim() || ""
+      })
+    });
 
-      if (response.ok) {
-        showToastMessage("Category added successfully ✨", "success");
-        setNewCategoryName("");
-        fetchCategories();
-      } else {
-        showToastMessage(data.error || "Failed to add category.", "error");
-      }
-    } catch (err) {
-           showToastMessage("Error adding category.", "error");
+    const data = await response.json();
+
+    if (response.ok) {
+      showToastMessage("Category updated successfully ✨", "success");
+      setEditingCategory(null);
+      fetchCategories();
+    } else {
+      showToastMessage(data.error || "Failed to update category.", "error");
     }
-  };
+  } catch (err) {
+    showToastMessage("Error updating category.", "error");
+  }
+};
 
   const handleDeleteCategory = async (category) => {
     const productsInCategory = products.filter(
@@ -1262,13 +1298,18 @@ const renderProductDetails = () => {
 )}    
      {adminView === "categories" && (
   <AdminCategories
-    categories={categories}
-    products={products}
-    newCategoryName={newCategoryName}
-    setNewCategoryName={setNewCategoryName}
-    handleAddCategory={handleAddCategory}
-    handleDeleteCategory={handleDeleteCategory}
-  />
+  categories={categories}
+  products={products}
+  newCategoryName={newCategoryName}
+  setNewCategoryName={setNewCategoryName}
+  newCategoryNameAr={newCategoryNameAr}
+  setNewCategoryNameAr={setNewCategoryNameAr}
+  editingCategory={editingCategory}
+  setEditingCategory={setEditingCategory}
+  handleAddCategory={handleAddCategory}
+  handleUpdateCategory={handleUpdateCategory}
+  handleDeleteCategory={handleDeleteCategory}
+/>
 )}
          {adminView === "add-product" && (
   <AddProductForm

@@ -2,6 +2,7 @@ import eloriaLogo from "../images/eloria-logo.png";
 
 function Navbar({
   isArabic,
+  language,
   categories,
   selectedCategory,
   favoritesCount,
@@ -15,9 +16,15 @@ function Navbar({
   setShowCart,
   setLanguage,
   startDrag,
-  onDrag,language,
+  onDrag,
   stopDrag
 }) {
+  const getCategoryLabel = (category) => {
+    return language === "ar"
+      ? category.name_ar || category.name
+      : category.name;
+  };
+
   return (
     <div className="luxury-navbar">
       <div className="nav-left">
@@ -45,7 +52,7 @@ function Navbar({
             className={selectedCategory === "all" ? "active-nav-category" : ""}
             onClick={handleShopNow}
           >
-            Shop All
+            {language === "ar" ? "كل المنتجات" : "Shop All"}
           </button>
 
           {categories.map((category) => (
@@ -58,9 +65,7 @@ function Navbar({
               }
               onClick={() => handleCategorySelect(String(category.id))}
             >
-              {language === "ar"
-  ? category.name_ar || category.name
-  : category.name}
+              {getCategoryLabel(category)}
             </button>
           ))}
 
@@ -69,7 +74,7 @@ function Navbar({
             onClick={handleShopNow}
             tabIndex="-1"
           >
-            Shop All
+            {language === "ar" ? "كل المنتجات" : "Shop All"}
           </button>
 
           {categories.map((category) => (
@@ -83,9 +88,7 @@ function Navbar({
               onClick={() => handleCategorySelect(String(category.id))}
               tabIndex="-1"
             >
-              {language === "ar"
-  ? category.name_ar || category.name
-  : category.name}
+              {getCategoryLabel(category)}
             </button>
           ))}
         </div>
@@ -97,7 +100,7 @@ function Navbar({
         </button>
 
         <button className="nav-icon-btn" onClick={() => setShowCart(true)}>
-          Bag ({totalItems})
+          {language === "ar" ? `السلة (${totalItems})` : `Bag (${totalItems})`}
         </button>
 
         <button
