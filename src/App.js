@@ -1311,6 +1311,7 @@ const renderProductDetails = () => {
   return (
     <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
       <Navbar
+      language={language}
         isArabic={isArabic}
         categories={categories}
         selectedCategory={selectedCategory}

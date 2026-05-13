@@ -43,9 +43,7 @@ function AdminCategories({
               <div key={category.id} className="category-admin-card">
                 <div className="category-admin-info">
                   <span className="category-admin-id">#{category.id}</span>
-                  <strong>{language === "ar"
-  ? category.name_ar || category.name
-  : category.name}</strong>
+                  <strong>{category.name}</strong>
                   <small>{productCount} products</small>
                 </div>
 

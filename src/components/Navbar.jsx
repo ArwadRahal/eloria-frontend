@@ -15,7 +15,7 @@ function Navbar({
   setShowCart,
   setLanguage,
   startDrag,
-  onDrag,
+  onDrag,language,
   stopDrag
 }) {
   return (
