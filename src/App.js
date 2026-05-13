@@ -577,7 +577,7 @@ useEffect(() => {
     const existingProduct = cart.find((item) => item.id === product.id);
     if (existingProduct) {
       if (existingProduct.quantity >= product.stock) {
-        showToastMessage("No more stock available ⚠️", "error");
+        showToastMessage("Unavailable quantity 💗", "error");
         return;
       }
       const updatedCart = cart.map((item) =>
