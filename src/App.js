@@ -646,7 +646,7 @@ useEffect(() => {
         }
 
         if (productInStock && item.quantity >= productInStock.stock) {
-          showToastMessage("No more stock available ⚠️", "error");
+          showToastMessage("Unavailable quantity 💗", "error");
         }
       }
 

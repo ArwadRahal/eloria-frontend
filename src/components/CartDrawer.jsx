@@ -19,12 +19,16 @@ function CartDrawer({
 }) {
   if (!showCart) return null;
 
+  const isArabic = language === "ar";
+
   return (
     <div className="cart-overlay premium-cart-overlay" onClick={() => setShowCart(false)}>
       <aside className="cart-popup premium-cart-drawer" onClick={(e) => e.stopPropagation()}>
         <div className="cart-popup-header premium-cart-header">
           <div>
-            <p className="cart-mini-label">Your ELORIA bag</p>
+            <p className="cart-mini-label">
+              {isArabic ? "حقيبة ELORIA الخاصة بك" : "Your ELORIA bag"}
+            </p>
             <h2>{t[language].cart}</h2>
           </div>
 
@@ -40,8 +44,12 @@ function CartDrawer({
         {cart.length === 0 ? (
           <div className="premium-empty-cart">
             <div className="empty-cart-icon">♡</div>
-            <h3>Your bag is empty</h3>
-            <p>Add your favorite ELORIA picks and come back here to complete your order.</p>
+            <h3>{isArabic ? "السلة فارغة" : "Your bag is empty"}</h3>
+            <p>
+              {isArabic
+                ? "أضيفي منتجاتك المفضلة من ELORIA ثم عودي لإكمال الطلب."
+                : "Add your favorite ELORIA picks and come back here to complete your order."}
+            </p>
 
             <button
               className="confirm-btn"
@@ -50,7 +58,7 @@ function CartDrawer({
                 handleShopNow();
               }}
             >
-              Start Shopping
+              {isArabic ? "ابدئي التسوق" : "Start Shopping"}
             </button>
           </div>
         ) : (
@@ -72,9 +80,12 @@ function CartDrawer({
                   <div className="cart-item-info">
                     <div className="cart-item-top">
                       <div>
-                        <h4>{getDisplayProductName(item.name)}</h4>
+                        <h4>{getDisplayProductName(item, language)}</h4>
                         {getShadeName(item.name) && (
-                          <p className="cart-item-shade">{getShadeName(item.name)}</p>
+                          <p className="cart-item-shade">
+                            {isArabic ? "الدرجة: " : "Shade: "}
+                            {getShadeName(item.name)}
+                          </p>
                         )}
                       </div>
 
@@ -119,16 +130,20 @@ function CartDrawer({
 
             <div className="premium-cart-footer">
               <div className="cart-total-line">
-                <span>Items</span>
+                <span>{isArabic ? "عدد المنتجات" : "Items"}</span>
                 <strong>{totalItems}</strong>
               </div>
 
               <div className="cart-total-line cart-grand-total">
-                <span>Total</span>
+                <span>{isArabic ? "المجموع" : "Total"}</span>
                 <strong>{Number(totalPrice).toFixed(2)} ₪</strong>
               </div>
 
-              <p className="cart-delivery-note">Payment is collected on delivery.</p>
+              <p className="cart-delivery-note">
+                {isArabic
+                  ? "يتم الدفع عند الاستلام."
+                  : "Payment is collected on delivery."}
+              </p>
 
               <button
                 className="confirm-btn premium-checkout-btn"
@@ -137,7 +152,7 @@ function CartDrawer({
                   setShowCart(false);
                 }}
               >
-                Continue to Checkout
+                {isArabic ? "المتابعة للدفع" : "Continue to Checkout"}
               </button>
             </div>
           </>
