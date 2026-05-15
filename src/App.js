@@ -269,14 +269,29 @@ description_ar: "",
 
 const fetchCategories = async () => {
   try {
+    const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+
+    if (cachedCategories && categories.length === 0) {
+      setCategories(JSON.parse(cachedCategories));
+    }
+
     const data = await fetchCategoriesRequest();
     const safeCategories = Array.isArray(data) ? data : [];
 
     setCategories(safeCategories);
+    sessionStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(safeCategories));
   } catch (err) {
-    setCategories([]);
+    const cachedCategories = sessionStorage.getItem(CATEGORIES_CACHE_KEY);
+
+    if (cachedCategories) {
+      setCategories(JSON.parse(cachedCategories));
+    } else {
+      setCategories([]);
+    }
   }
 };
+
+
 const handleAddCategory = async () => {
   const trimmedName = newCategoryName.trim();
   const trimmedNameAr = newCategoryNameAr.trim();
@@ -390,18 +405,34 @@ const handleUpdateCategory = async (category) => {
 
   const fetchProducts = async () => {
   try {
-    setLoading(true);
+    const cachedProducts = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+
+    if (cachedProducts && products.length === 0) {
+      setProducts(JSON.parse(cachedProducts));
+      setLoading(false);
+    } else {
+      setLoading(true);
+    }
 
     const data = await fetchProductsRequest();
     const safeProducts = Array.isArray(data) ? data : [];
 
     setProducts(safeProducts);
+    sessionStorage.setItem(PRODUCTS_CACHE_KEY, JSON.stringify(safeProducts));
   } catch (err) {
-    setProducts([]);
+    const cachedProducts = sessionStorage.getItem(PRODUCTS_CACHE_KEY);
+
+    if (cachedProducts) {
+      setProducts(JSON.parse(cachedProducts));
+    } else {
+      setProducts([]);
+    }
   } finally {
     setLoading(false);
   }
 };
+
+
   const fetchOrders = async () => {
     try {
 const res = await fetch(`${API_URL}/orders-with-items`, {
