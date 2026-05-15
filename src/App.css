@@ -6489,3 +6489,25 @@ button:disabled {
     border-radius: 0 !important;
   }
 }
+.premium-cart-overlay {
+  z-index: 99999 !important;
+}
+
+.premium-cart-drawer {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  height: 100vh !important;
+  z-index: 100000 !important;
+  padding-top: 28px !important;
+}
+
+.rtl .premium-cart-drawer {
+  right: 0 !important;
+  left: auto !important;
+}
+
+.premium-close-btn,
+.close-cart-btn {
+  z-index: 100001 !important;
+}
