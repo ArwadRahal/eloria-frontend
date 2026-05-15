@@ -66,8 +66,8 @@ const [language, setLanguage] = useState("en");
 const [editingCategory, setEditingCategory] = useState(null);
 const ADMIN_TIMEOUT = 5 * 60 * 1000;
 const isArabic = language === "ar";
-const PRODUCTS_CACHE_KEY = "eloria_products_cache_v1";
-const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v1";
+const PRODUCTS_CACHE_KEY = "eloria_products_cache_v2";
+const CATEGORIES_CACHE_KEY = "eloria_categories_cache_v2";
 const CART_STORAGE_KEY = "eloria_cart_v1";
 const getImageUrl = (url) => {
   if (!url) return defaultProductImage;
