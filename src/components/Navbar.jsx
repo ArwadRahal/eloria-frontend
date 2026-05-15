@@ -48,50 +48,33 @@ function Navbar({
         onMouseLeave={stopDrag}
       >
         <div className="nav-marquee">
-          <button
-            className={selectedCategory === "all" ? "active-nav-category" : ""}
-            onClick={handleShopNow}
-          >
-            {language === "ar" ? "كل المنتجات" : "Shop All"}
-          </button>
+  {[0, 1, 2].map((loopIndex) => (
+    <div className="nav-category-loop" key={loopIndex}>
+      <button
+        className={selectedCategory === "all" ? "active-nav-category" : ""}
+        onClick={handleShopNow}
+        tabIndex={loopIndex === 0 ? "0" : "-1"}
+      >
+        {language === "ar" ? "كل المنتجات" : "Shop All"}
+      </button>
 
-          {categories.map((category) => (
-            <button
-              key={`main-${category.id}`}
-              className={
-                String(selectedCategory) === String(category.id)
-                  ? "active-nav-category"
-                  : ""
-              }
-              onClick={() => handleCategorySelect(String(category.id))}
-            >
-              {getCategoryLabel(category)}
-            </button>
-          ))}
-
-          <button
-            className={selectedCategory === "all" ? "active-nav-category" : ""}
-            onClick={handleShopNow}
-            tabIndex="-1"
-          >
-            {language === "ar" ? "كل المنتجات" : "Shop All"}
-          </button>
-
-          {categories.map((category) => (
-            <button
-              key={`copy-${category.id}`}
-              className={
-                String(selectedCategory) === String(category.id)
-                  ? "active-nav-category"
-                  : ""
-              }
-              onClick={() => handleCategorySelect(String(category.id))}
-              tabIndex="-1"
-            >
-              {getCategoryLabel(category)}
-            </button>
-          ))}
-        </div>
+      {categories.map((category) => (
+        <button
+          key={`${loopIndex}-${category.id}`}
+          className={
+            String(selectedCategory) === String(category.id)
+              ? "active-nav-category"
+              : ""
+          }
+          onClick={() => handleCategorySelect(String(category.id))}
+          tabIndex={loopIndex === 0 ? "0" : "-1"}
+        >
+          {getCategoryLabel(category)}
+        </button>
+      ))}
+    </div>
+  ))}
+</div>
       </div>
 
       <div className="nav-right">

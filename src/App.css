@@ -6511,3 +6511,16 @@ button:disabled {
 .close-cart-btn {
   z-index: 100001 !important;
 }
+.nav-marquee {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  min-width: max-content;
+}
+
+.nav-category-loop {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex-shrink: 0;
+}
