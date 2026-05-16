@@ -39,37 +39,36 @@ function Navbar({
           <img src={eloriaLogo} alt="ELORIA Logo" />
         </div>
       </div>
-
-      <div className="nav-center">
-        <div className="nav-marquee">
-  {[0, 1, 2].map((loopIndex) => (
-    <div className="nav-category-loop" key={loopIndex}>
-      <button
-        className={selectedCategory === "all" ? "active-nav-category" : ""}
-        onClick={handleShopNow}
-        tabIndex={loopIndex === 0 ? "0" : "-1"}
-      >
-        {language === "ar" ? "كل المنتجات" : "Shop All"}
-      </button>
-
-      {categories.map((category) => (
+<div className="nav-center">
+  <div className="nav-marquee">
+    {[0, 1, 2, 3].map((loopIndex) => (
+      <div className="nav-category-loop" key={loopIndex}>
         <button
-          key={`${loopIndex}-${category.id}`}
-          className={
-            String(selectedCategory) === String(category.id)
-              ? "active-nav-category"
-              : ""
-          }
-          onClick={() => handleCategorySelect(String(category.id))}
+          className={selectedCategory === "all" ? "active-nav-category" : ""}
+          onClick={handleShopNow}
           tabIndex={loopIndex === 0 ? "0" : "-1"}
         >
-          {getCategoryLabel(category)}
+          {language === "ar" ? "كل المنتجات" : "Shop All"}
         </button>
-      ))}
-    </div>
-  ))}
-</div>
+
+        {categories.map((category) => (
+          <button
+            key={`${loopIndex}-${category.id}`}
+            className={
+              String(selectedCategory) === String(category.id)
+                ? "active-nav-category"
+                : ""
+            }
+            onClick={() => handleCategorySelect(String(category.id))}
+            tabIndex={loopIndex === 0 ? "0" : "-1"}
+          >
+            {getCategoryLabel(category)}
+          </button>
+        ))}
       </div>
+    ))}
+  </div>
+</div>
 
       <div className="nav-right">
         <button className="nav-icon-btn" onClick={() => setShowFavorites(true)}>

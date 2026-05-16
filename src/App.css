@@ -6524,41 +6524,57 @@ button:disabled {
   gap: 28px;
   flex-shrink: 0;
 }
-.luxury-navbar {
-  display: grid !important;
-  grid-template-columns: 90px 1fr auto !important;
-  align-items: center !important;
-  gap: 18px !important;
-}
-
 .nav-center {
-  width: 100% !important;
-  overflow: hidden !important;
-  display: flex !important;
-  justify-content: center !important;
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  position: relative;
 }
 
 .nav-marquee {
-  display: flex !important;
-  align-items: center !important;
-  gap: 34px !important;
-  width: max-content !important;
-  min-width: max-content !important;
-  transform: translateX(0) !important;
+  display: flex;
+  align-items: center;
+  width: max-content;
+  gap: 34px;
+  animation: navInfiniteMove 55s linear infinite;
 }
 
 .nav-category-loop {
-  display: flex !important;
-  align-items: center !important;
-  gap: 34px !important;
-  flex-shrink: 0 !important;
+  display: flex;
+  align-items: center;
+  gap: 34px;
+  flex-shrink: 0;
 }
 
 .nav-marquee button {
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.nav-right {
-  flex-shrink: 0 !important;
+.nav-center:hover .nav-marquee {
+  animation-play-state: paused;
+}
+
+@keyframes navInfiniteMove {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-25%);
+  }
+}
+
+.rtl .nav-marquee {
+  animation-name: navInfiniteMoveRTL;
+}
+
+@keyframes navInfiniteMoveRTL {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(25%);
+  }
 }
