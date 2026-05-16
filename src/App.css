@@ -6653,3 +6653,20 @@ button:disabled {
     background-position: -200% 0;
   }
 }
+
+@media (max-width: 768px) {
+  .hero-video {
+    object-fit: cover;
+    object-position: center center;
+  }
+
+  .hero-video-section {
+    height: 92vh !important;
+    min-height: 640px !important;
+  }
+
+  .hero-content {
+    max-width: 92%;
+    text-align: center;
+  }
+}
