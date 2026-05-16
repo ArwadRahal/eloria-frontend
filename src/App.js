@@ -1551,6 +1551,7 @@ const renderProductDetails = () => {
       )}
 
       <FavoritesPopup
+      language={language}
         showFavorites={showFavorites}
         setShowFavorites={setShowFavorites}
         favorites={favorites}

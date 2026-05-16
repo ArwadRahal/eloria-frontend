@@ -6670,3 +6670,37 @@ button:disabled {
     text-align: center;
   }
 }
+.premium-favorites-popup {
+  position: relative;
+  padding-top: 30px !important;
+}
+
+.premium-favorites-close {
+  position: static !important;
+  width: 42px !important;
+  height: 42px !important;
+  flex-shrink: 0;
+}
+
+.favorites-popup-header {
+  gap: 14px;
+}
+
+.rtl .favorites-popup {
+  direction: rtl;
+  text-align: right;
+}
+
+@media (max-width: 600px) {
+  .favorites-overlay {
+    align-items: flex-start !important;
+    padding: 90px 12px 20px !important;
+    overflow-y: auto;
+  }
+
+  .favorites-popup {
+    width: 100% !important;
+    max-height: calc(100vh - 115px) !important;
+    border-radius: 24px !important;
+  }
+}
