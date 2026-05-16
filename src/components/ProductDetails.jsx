@@ -75,7 +75,7 @@ function ProductDetails({
           setPage("shop");
           setSelectedProduct(null);
           setTimeout(() => {
-            window.scrollTo({ top: 0, behavior: "smooth" });
+           window.scrollTo({ top: 0 });
           }, 50);
         }}
       >
@@ -99,7 +99,7 @@ function ProductDetails({
               src={getImageUrl(galleryImages[safeImageIndex], API_URL)}
               alt={selectedProduct.name}
               className="product-details-main-image"
-              loading="eager"
+              loading="lazy"
               decoding="async"
               fetchPriority="high"
               onError={(e) => {
@@ -160,8 +160,7 @@ function ProductDetails({
 <h1>{getDisplayProductName(selectedProduct, language)}</h1>
           {getAllProductVariants(selectedProduct, products).length > 1 && (
             <div className="details-variants-box">
-              <p>Choose shade</p>
-
+<p>  {language === "ar" ? "اختاري الدرجة" : "Choose shade"}</p>
               <div className="details-variant-list">
                 {getAllProductVariants(selectedProduct, products).map((variant) => (
                   <button
@@ -229,7 +228,7 @@ function ProductDetails({
               }`}
               onClick={() => toggleFavorite(selectedProduct)}
             >
-              {isFavorite(selectedProduct.id) ? "❤ Saved" : "♡ Save"}
+  {isFavorite(selectedProduct.id)  ? language === "ar"    ? "❤ تم الحفظ"    : "❤ Saved"  : language === "ar"  ? "♡ حفظ" : "♡ Save"}
             </button>
           </div>
         </div>
@@ -249,7 +248,7 @@ function ProductDetails({
             onClick={() => {
               setPage("shop");
               setTimeout(() => {
-                window.scrollTo({ top: 0, behavior: "smooth" });
+                window.scrollTo({ top: 0 });
               }, 50);
             }}
           >
