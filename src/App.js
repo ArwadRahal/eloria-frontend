@@ -1162,6 +1162,18 @@ const deleteOrder = async (orderId) => {
 
   return diffDays <= 7;
 };
+
+
+const renderProductSkeletons = () => {
+  return Array.from({ length: 8 }).map((_, index) => (
+    <div className="product-card product-skeleton-card" key={index}>
+      <div className="skeleton-image"></div>
+      <div className="skeleton-line skeleton-title"></div>
+      <div className="skeleton-line skeleton-price"></div>
+      <div className="skeleton-button"></div>
+    </div>
+  ));
+};
 const renderStoreProductCard = (product) => {
   return (
     <ProductCard
@@ -1527,9 +1539,9 @@ const renderProductDetails = () => {
           </div>
 
           <div className="products-container">
-            {loading ? (
-              <div className="loader"></div>
-            ) : filteredProducts.length > 0 ? (
+           {loading ? (
+  renderProductSkeletons()
+) : filteredProducts.length > 0 ? (
               filteredProducts.map((product) => renderStoreProductCard(product))
             ) : (
               <p className="no-products-message">{t[language].noProducts}</p>
