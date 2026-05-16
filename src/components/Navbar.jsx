@@ -40,13 +40,7 @@ function Navbar({
         </div>
       </div>
 
-      <div
-        className="nav-center"
-        onMouseDown={(e) => startDrag(e)}
-        onMouseMove={(e) => onDrag(e)}
-        onMouseUp={stopDrag}
-        onMouseLeave={stopDrag}
-      >
+      <div className="nav-center">
         <div className="nav-marquee">
   {[0, 1, 2].map((loopIndex) => (
     <div className="nav-category-loop" key={loopIndex}>
