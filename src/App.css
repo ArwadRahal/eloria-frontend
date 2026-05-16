@@ -6790,3 +6790,41 @@ button:disabled {
     flex-shrink: 0;
   }
 }
+.eloria-footer {
+  background: #fff0f6;
+  border-top: 1px solid #f4d0df;
+  padding: 36px 18px !important;
+}
+
+.footer-brand h3 {
+  margin: 0 0 8px;
+  color: #c94f7c;
+  letter-spacing: 3px;
+  font-size: 24px;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.footer-links button,
+.footer-links a {
+  border: none;
+  background: white;
+  color: #c94f7c;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.footer-note {
+  margin: 0;
+  color: #8c6b7a;
+  font-size: 13px;
+}

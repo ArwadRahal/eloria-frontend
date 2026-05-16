@@ -1606,9 +1606,36 @@ const renderProductDetails = () => {
         </div>
       )}
 
-      <footer className="site-footer">
-        <p>{t[language].footer}</p>
-      </footer>
+      <footer className="site-footer eloria-footer">
+  <div className="footer-brand">
+    <h3>ELORIA</h3>
+    <p>{t[language].footer}</p>
+  </div>
+
+  <div className="footer-links">
+    <button onClick={() => setPage("home")}>
+      {language === "ar" ? "الرئيسية" : "Home"}
+    </button>
+
+    <button onClick={handleShopNow}>
+      {language === "ar" ? "تسوّقي" : "Shop"}
+    </button>
+
+    <a
+      href="https://instagram.com/theeloriaglow"
+      target="_blank"
+      rel="noreferrer"
+    >
+      Instagram
+    </a>
+  </div>
+
+  <p className="footer-note">
+    {language === "ar"
+      ? "الدفع عند الاستلام • توصيل داخل البلاد"
+      : "Cash on delivery • Local delivery"}
+  </p>
+</footer>
     </div>
   );
 }
