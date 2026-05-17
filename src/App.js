@@ -1126,7 +1126,17 @@ const deleteOrder = async (orderId) => {
       return 0;
     });
 
-  const latestProducts = useMemo(() => uniqueProducts.slice(0, 4), [uniqueProducts]);
+ const latestProducts = useMemo(() => {
+  const newProducts = uniqueProducts.filter(
+    (product) => Number(product.is_new) === 1
+  );
+
+  const regularProducts = uniqueProducts.filter(
+    (product) => Number(product.is_new) !== 1
+  );
+
+  return [...newProducts, ...regularProducts].slice(0, 4);
+}, [uniqueProducts]);
   const softBeautyPicks = useMemo(() => {
     const picks = uniqueProducts.slice(4, 8);
     return picks.length > 0 ? picks : uniqueProducts.slice(0, 4);
