@@ -101,6 +101,17 @@ function EditProductPopup({
               </option>
             ))}
           </select>
+
+
+<label className="checkbox-new-product">
+  <input
+    type="checkbox"
+    name="is_new"
+    checked={Number(editingProduct?.is_new) === 1}
+    onChange={handleEditChange}
+  />
+  Mark as NEW
+</label>
         </div>
 
         <div className="admin-form-section">
