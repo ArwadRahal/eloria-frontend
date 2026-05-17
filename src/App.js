@@ -618,7 +618,9 @@ useEffect(() => {
 
 useEffect(() => {
   const openAdminFromSecretLink = async () => {
-    if (window.location.pathname !== "/eloria-admin-2026") return;
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("admin") !== "eloria") return;
 
     const password = prompt("Enter admin password:");
     if (password === null) {
