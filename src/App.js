@@ -617,12 +617,38 @@ useEffect(() => {
 }, [isAdmin]);
 
 useEffect(() => {
-  const path = window.location.pathname;
+  const openAdminFromSecretLink = async () => {
+    if (window.location.pathname !== "/eloria-admin-2026") return;
 
-  if (path === "/eloria-admin-2026") {
-    setShowAdminLogin(true);
-  }
+    const password = prompt("Enter admin password:");
+    if (password === null) {
+      window.history.replaceState({}, "", "/");
+      return;
+    }
+
+    try {
+      const response = await adminLogin(password);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        localStorage.setItem("eloria_admin_token", data.token);
+        setIsAdmin(true);
+        setAdminView("dashboard");
+        window.history.replaceState({}, "", "/");
+        showToastMessage("Admin mode activated 🔐", "success");
+      } else {
+        showToastMessage(data.message || "Wrong password ❌", "error");
+        window.history.replaceState({}, "", "/");
+      }
+    } catch (error) {
+      showToastMessage("Admin login failed. Try again.", "error");
+      window.history.replaceState({}, "", "/");
+    }
+  };
+
+  openAdminFromSecretLink();
 }, []);
+
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
     if (existingProduct) {
