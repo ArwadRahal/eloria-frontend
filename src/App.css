@@ -6828,3 +6828,23 @@ button:disabled {
   color: #8c6b7a;
   font-size: 13px;
 }
+
+.checkbox-new-product {
+  display: flex !important;
+  align-items: center;
+  gap: 10px;
+  margin-top: 18px !important;
+  padding: 14px 16px;
+  border: 1px solid #f3c8da;
+  border-radius: 16px;
+  background: #fff7fb;
+  font-weight: 800;
+  color: #c94f7c;
+  cursor: pointer;
+}
+
+.checkbox-new-product input {
+  width: 18px !important;
+  height: 18px !important;
+  accent-color: #d64f86;
+}
