@@ -33,7 +33,6 @@ function Navbar({
           onClick={() => {
             setPage("home");
             setSelectedCategory("all");
-            handleHiddenAdminEntry();
           }}
         >
           <img src={eloriaLogo} alt="ELORIA Logo" />

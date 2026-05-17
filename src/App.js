@@ -544,42 +544,42 @@ const res = await fetch(`${API_URL}/orders-with-items`, {
 
     return foundCategory ? foundCategory.name : "Unknown";
   };
-const handleHiddenAdminEntry = async () => {
-  logoClickCountRef.current += 1;
+// const handleHiddenAdminEntry = async () => {
+//   logoClickCountRef.current += 1;
 
-  if (logoClickTimerRef.current) {
-    clearTimeout(logoClickTimerRef.current);
-  }
+//   if (logoClickTimerRef.current) {
+//     clearTimeout(logoClickTimerRef.current);
+//   }
 
-  logoClickTimerRef.current = setTimeout(() => {
-    logoClickCountRef.current = 0;
-  }, 1500);
+//   logoClickTimerRef.current = setTimeout(() => {
+//     logoClickCountRef.current = 0;
+//   }, 1500);
 
-  if (logoClickCountRef.current >= 5) {
-    logoClickCountRef.current = 0;
+//   if (logoClickCountRef.current >= 5) {
+//     logoClickCountRef.current = 0;
 
-    const password = prompt("Enter admin password:");
-    if (password === null) return;
+//     const password = prompt("Enter admin password:");
+//     if (password === null) return;
 
-    try {
-      const response = await adminLogin(password);
-      const data = await response.json();
+//     try {
+//       const response = await adminLogin(password);
+//       const data = await response.json();
 
-      if (response.ok && data.success) {
-        localStorage.setItem("eloria_admin_token", data.token);
+//       if (response.ok && data.success) {
+//         localStorage.setItem("eloria_admin_token", data.token);
 
-        setIsAdmin(true);
-        setAdminView("dashboard");
+//         setIsAdmin(true);
+//         setAdminView("dashboard");
 
-        showToastMessage("Admin mode activated 🔐", "success");
-      } else {
-        showToastMessage(data.message || "Wrong password ❌", "error");
-      }
-    } catch (error) {
-      showToastMessage("Admin login failed. Try again.", "error");
-    }
-  }
-};
+//         showToastMessage("Admin mode activated 🔐", "success");
+//       } else {
+//         showToastMessage(data.message || "Wrong password ❌", "error");
+//       }
+//     } catch (error) {
+//       showToastMessage("Admin login failed. Try again.", "error");
+//     }
+//   }
+// };
   const handleAdminLogout = () => {
     localStorage.removeItem("eloria_admin_token");
     setIsAdmin(false);
@@ -615,6 +615,14 @@ useEffect(() => {
     window.removeEventListener("scroll", resetAdminTimer);
   };
 }, [isAdmin]);
+
+useEffect(() => {
+  const path = window.location.pathname;
+
+  if (path === "/eloria-admin-2026") {
+    setShowAdminLogin(true);
+  }
+}, []);
   const addToCart = (product) => {
     const existingProduct = cart.find((item) => item.id === product.id);
     if (existingProduct) {
@@ -1385,7 +1393,7 @@ const renderProductDetails = () => {
         totalItems={totalItems}
         setPage={setPage}
         setSelectedCategory={setSelectedCategory}
-        handleHiddenAdminEntry={handleHiddenAdminEntry}
+        // handleHiddenAdminEntry={handleHiddenAdminEntry}
         handleShopNow={handleShopNow}
         handleCategorySelect={handleCategorySelect}
         setShowFavorites={setShowFavorites}
