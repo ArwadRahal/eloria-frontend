@@ -63,6 +63,7 @@ function AdminProducts({
             <tr>
               <th>Image</th>
               <th>Name</th>
+              <th>NEW</th>
               <th>Category</th>
               <th>Price</th>
               <th>Stock</th>
@@ -95,7 +96,19 @@ function AdminProducts({
                       />
                     </td>
 
-                    <td className="product-name-cell">{product.name}</td>
+                    <td className="product-name-cell">
+                      {product.name}
+                      {product.name_ar && <small>{product.name_ar}</small>}
+                    </td>
+
+                    <td>
+                      {Number(product.is_new) === 1 ? (
+                        <span className="admin-new-badge">NEW</span>
+                      ) : (
+                        <span className="admin-normal-badge">—</span>
+                      )}
+                    </td>
+
                     <td>{getCategoryName(product.category_id)}</td>
                     <td>{product.price} ₪</td>
 
@@ -117,17 +130,11 @@ function AdminProducts({
 
                     <td>
                       <div className="table-actions">
-                        <button
-                          className="edit-btn"
-                          onClick={() => handleEditProduct(product)}
-                        >
+                        <button className="edit-btn" onClick={() => handleEditProduct(product)}>
                           Edit
                         </button>
 
-                        <button
-                          className="delete-btn"
-                          onClick={() => deleteProduct(product.id)}
-                        >
+                        <button className="delete-btn" onClick={() => deleteProduct(product.id)}>
                           Delete
                         </button>
                       </div>
@@ -137,7 +144,7 @@ function AdminProducts({
               })
             ) : (
               <tr>
-                <td colSpan="7" className="no-products-row">
+                <td colSpan="8" className="no-products-row">
                   No matching products found.
                 </td>
               </tr>

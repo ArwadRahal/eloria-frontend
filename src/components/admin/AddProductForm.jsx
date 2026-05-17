@@ -87,42 +87,34 @@ function AddProductForm({
             </option>
           ))}
         </select>
+
+        <label className="checkbox-new-product">
+          <input
+            type="checkbox"
+            name="is_new"
+            checked={Number(newProduct.is_new) === 1}
+            onChange={handleNewProductChange}
+          />
+          Mark as NEW
+        </label>
       </div>
 
       <div className="admin-form-section">
         <h4>Product Images</h4>
 
         <label>Main Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleImagePreview(e, "image")}
-        />
+        <input type="file" accept="image/*" onChange={(e) => handleImagePreview(e, "image")} />
 
         <label>Second Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleImagePreview(e, "image2")}
-        />
+        <input type="file" accept="image/*" onChange={(e) => handleImagePreview(e, "image2")} />
 
         <label>Third Image</label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleImagePreview(e, "image3")}
-        />
+        <input type="file" accept="image/*" onChange={(e) => handleImagePreview(e, "image3")} />
 
         <div className="preview-images">
-          {previewImages.image && (
-            <img src={previewImages.image} alt="preview 1" />
-          )}
-          {previewImages.image2 && (
-            <img src={previewImages.image2} alt="preview 2" />
-          )}
-          {previewImages.image3 && (
-            <img src={previewImages.image3} alt="preview 3" />
-          )}
+          {previewImages.image && <img src={previewImages.image} alt="preview 1" />}
+          {previewImages.image2 && <img src={previewImages.image2} alt="preview 2" />}
+          {previewImages.image3 && <img src={previewImages.image3} alt="preview 3" />}
         </div>
       </div>
 

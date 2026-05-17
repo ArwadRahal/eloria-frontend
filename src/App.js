@@ -239,6 +239,7 @@ const t = {
   const [newProduct, setNewProduct] = useState({
     name: "",
     name_ar: "",
+    is_new: 0,
     price: "",
     stock: "",
     category_id: "1",
@@ -702,20 +703,22 @@ useEffect(() => {
   };
 
   const handleNewProductChange = (e) => {
-    const { name, value } = e.target;
-    setNewProduct({
-      ...newProduct,
-      [name]: value
-    });
-  };
+  const { name, value, type, checked } = e.target;
 
-  const handleEditChange = (e) => {
-    const { name, value } = e.target;
-    setEditingProduct({
-      ...editingProduct,
-      [name]: value
-    });
-  };
+  setNewProduct({
+    ...newProduct,
+    [name]: type === "checkbox" ? (checked ? 1 : 0) : value
+  });
+};
+
+ const handleEditChange = (e) => {
+  const { name, value, type, checked } = e.target;
+
+  setEditingProduct({
+    ...editingProduct,
+    [name]: type === "checkbox" ? (checked ? 1 : 0) : value
+  });
+};
 
   const handleEditProduct = (product) => {
     setEditingProduct({
@@ -723,6 +726,7 @@ useEffect(() => {
 
       category_id: String(product.category_id || "1"),
       name_ar: product.name_ar || "",
+      is_new: Number(product.is_new) === 1 ? 1 : 0,
       description_en: product.description_en || "",
 description_ar: product.description_ar || "",
       image_url: product.image_url || "",
@@ -751,6 +755,7 @@ description_ar: product.description_ar || "",
       const formData = new FormData();
       formData.append("name", newProduct.name);
       formData.append("name_ar", newProduct.name_ar);
+      formData.append("is_new", newProduct.is_new || 0);
       formData.append("price", newProduct.price);
       formData.append("stock", newProduct.stock);
       formData.append("category_id", newProduct.category_id);
@@ -780,7 +785,8 @@ formData.append("description_ar", newProduct.description_ar);
 description_ar: "",
           image_url: "",
           image_url_2: "",
-          image_url_3: ""
+          image_url_3: "",
+          is_new: 0
         });
 
         setNewProductImage(null);
@@ -812,6 +818,7 @@ setPreviewImages({
 
     formData.append("name", editingProduct.name);
     formData.append("name_ar", editingProduct.name_ar || "");
+    formData.append("is_new", editingProduct.is_new || 0);
     formData.append("price", editingProduct.price);
     formData.append("stock", editingProduct.stock);
     formData.append("category_id", editingProduct.category_id);
@@ -1151,18 +1158,9 @@ const deleteOrder = async (orderId) => {
   ).length;
 
 
- const isNewProduct = (product) => {
-  if (!product?.created_at) return false;
-
-  const createdDate = new Date(product.created_at);
-  const today = new Date();
-
-  const diffTime = today - createdDate;
-  const diffDays = diffTime / (1000 * 60 * 60 * 24);
-
-  return diffDays <= 7;
+const isNewProduct = (product) => {
+  return Number(product?.is_new) === 1;
 };
-
 
 const renderProductSkeletons = () => {
   return Array.from({ length: 8 }).map((_, index) => (
