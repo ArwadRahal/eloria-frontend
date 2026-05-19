@@ -242,7 +242,7 @@ const t = {
     is_new: 0,
     price: "",
     stock: "",
-    category_id: "1",
+    category_id: "",
     description_en: "",
 description_ar: "",
     image_url: "",

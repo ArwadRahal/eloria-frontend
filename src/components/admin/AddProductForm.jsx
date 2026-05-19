@@ -77,16 +77,18 @@ function AddProductForm({
 
         <label>Category</label>
         <select
-          name="category_id"
-          value={newProduct.category_id || "1"}
-          onChange={handleNewProductChange}
-        >
-          {categories.map((category) => (
-            <option key={category.id} value={category.id}>
-              {category.name}
-            </option>
-          ))}
-        </select>
+  name="category_id"
+  value={newProduct.category_id || ""}
+  onChange={handleNewProductChange}
+>
+  <option value="">Choose category</option>
+
+  {categories.map((category) => (
+    <option key={category.id} value={category.id}>
+      {category.name}
+    </option>
+  ))}
+</select>
 
         <label className="checkbox-new-product">
           <input
