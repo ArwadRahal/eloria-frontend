@@ -30,14 +30,6 @@ function App() {
   const navIsDraggingRef = useRef(false);
   const navContainerRef = useRef(null);
 
-const startDrag = (e) => {
-  navIsDraggingRef.current = true;
-
-  const pageX = e.touches ? e.touches[0].pageX : e.pageX;
-
-  navStartXRef.current = pageX;
-  navScrollLeftRef.current = navContainerRef.current.scrollLeft;
-};
 
 const onDrag = (e) => {
   if (!navIsDraggingRef.current) return;
@@ -1301,14 +1293,7 @@ const renderProductDetails = () => {
     customerInfo.city.trim() &&
     customerInfo.address.trim();
 
-  const startDrag = (e) => {
-    const slider = e.currentTarget;
-    navIsDraggingRef.current = true;
-    slider.classList.add("dragging");
-
-    navStartXRef.current = e.pageX - slider.offsetLeft;
-    navScrollLeftRef.current = slider.scrollLeft;
-  };
+  
 
   const onDrag = (e) => {
     if (!navIsDraggingRef.current) return;
