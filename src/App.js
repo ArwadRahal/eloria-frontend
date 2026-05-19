@@ -27,53 +27,38 @@ import {
 function App() {
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
+
   const navIsDraggingRef = useRef(false);
   const navContainerRef = useRef(null);
-const navStartXRef = useRef(0);
-const navScrollLeftRef = useRef(0);
+  const navStartXRef = useRef(0);
+  const navScrollLeftRef = useRef(0);
 
-const startDrag = (e) => {
-  navIsDraggingRef.current = true;
+  const startDrag = (e) => {
+    if (!navContainerRef.current) return;
 
-  const pageX = e.touches
-    ? e.touches[0].pageX
-    : e.pageX;
+    navIsDraggingRef.current = true;
 
-  navStartXRef.current = pageX;
-  navScrollLeftRef.current =
-    navContainerRef.current.scrollLeft;
-};
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
 
-const onDrag = (e) => {
-  if (!navIsDraggingRef.current) return;
+    navStartXRef.current = pageX;
+    navScrollLeftRef.current = navContainerRef.current.scrollLeft;
+  };
 
-  const pageX = e.touches
-    ? e.touches[0].pageX
-    : e.pageX;
+  const onDrag = (e) => {
+    if (!navIsDraggingRef.current || !navContainerRef.current) return;
 
-  const walk = pageX - navStartXRef.current;
+    const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+    const walk = pageX - navStartXRef.current;
 
-  navContainerRef.current.scrollLeft =
-    navScrollLeftRef.current - walk;
-};
+    navContainerRef.current.scrollLeft =
+      navScrollLeftRef.current - walk;
+  };
 
-const stopDrag = () => {
-  navIsDraggingRef.current = false;
-};
+  const stopDrag = () => {
+    navIsDraggingRef.current = false;
+  };
 
-const onDrag = (e) => {
-  if (!navIsDraggingRef.current) return;
-
-  const pageX = e.touches ? e.touches[0].pageX : e.pageX;
-
-  const walk = pageX - navStartXRef.current;
-
-  navContainerRef.current.scrollLeft =
-    navScrollLeftRef.current - walk;
-};
-const stopDrag = () => {
-  navIsDraggingRef.current = false;
-};
+  const [products, setProducts] = useState([]);
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
