@@ -1293,21 +1293,7 @@ const renderProductDetails = () => {
     customerInfo.city.trim() &&
     customerInfo.address.trim();
 
-  
-
-  const onDrag = (e) => {
-    if (!navIsDraggingRef.current) return;
-
-    const slider = e.currentTarget;
-    e.preventDefault();
-
-    const x = e.pageX - slider.offsetLeft;
-    const walk = (x - navStartXRef.current) * 1.5;
-
-    slider.scrollLeft = navScrollLeftRef.current - walk;
-  };
-
-  const stopDrag = (e) => {
+    const stopDrag = (e) => {
     navIsDraggingRef.current = false;
 
     if (e?.currentTarget) {
