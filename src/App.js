@@ -59,7 +59,6 @@ function App() {
   };
 
   const [products, setProducts] = useState([]);
-  const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
   const [orders, setOrders] = useState([]);
