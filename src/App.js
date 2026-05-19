@@ -29,7 +29,37 @@ function App() {
   const logoClickTimerRef = useRef(null);
   const navIsDraggingRef = useRef(false);
   const navContainerRef = useRef(null);
+const navStartXRef = useRef(0);
+const navScrollLeftRef = useRef(0);
 
+const startDrag = (e) => {
+  navIsDraggingRef.current = true;
+
+  const pageX = e.touches
+    ? e.touches[0].pageX
+    : e.pageX;
+
+  navStartXRef.current = pageX;
+  navScrollLeftRef.current =
+    navContainerRef.current.scrollLeft;
+};
+
+const onDrag = (e) => {
+  if (!navIsDraggingRef.current) return;
+
+  const pageX = e.touches
+    ? e.touches[0].pageX
+    : e.pageX;
+
+  const walk = pageX - navStartXRef.current;
+
+  navContainerRef.current.scrollLeft =
+    navScrollLeftRef.current - walk;
+};
+
+const stopDrag = () => {
+  navIsDraggingRef.current = false;
+};
 
 const onDrag = (e) => {
   if (!navIsDraggingRef.current) return;
@@ -44,8 +74,6 @@ const onDrag = (e) => {
 const stopDrag = () => {
   navIsDraggingRef.current = false;
 };
-  const navStartXRef = useRef(0);
-  const navScrollLeftRef = useRef(0);
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -1293,13 +1321,6 @@ const renderProductDetails = () => {
     customerInfo.city.trim() &&
     customerInfo.address.trim();
 
-    const stopDrag = (e) => {
-    navIsDraggingRef.current = false;
-
-    if (e?.currentTarget) {
-      e.currentTarget.classList.remove("dragging");
-    }
-  };
 
   if (isAdmin) {
     return (
