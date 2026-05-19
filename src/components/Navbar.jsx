@@ -17,7 +17,8 @@ function Navbar({
   setLanguage,
   startDrag,
   onDrag,
-  stopDrag
+  stopDrag,
+    navContainerRef
 }) {
   const getCategoryLabel = (category) => {
     return language === "ar"
@@ -38,8 +39,18 @@ function Navbar({
           <img src={eloriaLogo} alt="ELORIA Logo" />
         </div>
       </div>
-<div className="nav-center">
-  <div className="nav-marquee">
+<div
+  ref={navContainerRef}
+  className="nav-center"
+  onMouseDown={startDrag}
+  onMouseMove={onDrag}
+  onMouseUp={stopDrag}
+  onMouseLeave={stopDrag}
+  onTouchStart={startDrag}
+  onTouchMove={onDrag}
+  onTouchEnd={stopDrag}
+>
+    <div className="nav-marquee">
     {[0, 1, 2, 3].map((loopIndex) => (
       <div className="nav-category-loop" key={loopIndex}>
         <button

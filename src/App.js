@@ -28,6 +28,30 @@ function App() {
   const logoClickCountRef = useRef(0);
   const logoClickTimerRef = useRef(null);
   const navIsDraggingRef = useRef(false);
+  const navContainerRef = useRef(null);
+
+const startDrag = (e) => {
+  navIsDraggingRef.current = true;
+
+  const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+
+  navStartXRef.current = pageX;
+  navScrollLeftRef.current = navContainerRef.current.scrollLeft;
+};
+
+const onDrag = (e) => {
+  if (!navIsDraggingRef.current) return;
+
+  const pageX = e.touches ? e.touches[0].pageX : e.pageX;
+
+  const walk = pageX - navStartXRef.current;
+
+  navContainerRef.current.scrollLeft =
+    navScrollLeftRef.current - walk;
+};
+const stopDrag = () => {
+  navIsDraggingRef.current = false;
+};
   const navStartXRef = useRef(0);
   const navScrollLeftRef = useRef(0);
   const [products, setProducts] = useState([]);
@@ -1196,6 +1220,10 @@ const deleteOrder = async (orderId) => {
   });
 
   const totalProductsCount = products.length;
+  const totalItemsCount = products.reduce(
+  (total, product) => total + Number(product.stock || 0),
+  0
+);
   const lowStockProductsCount = products.filter(
     (product) => product.stock > 0 && product.stock <= 3
   ).length;
@@ -1329,6 +1357,7 @@ const renderProductDetails = () => {
     totalProductsCount={totalProductsCount}
     lowStockProductsCount={lowStockProductsCount}
     outOfStockProductsCount={outOfStockProductsCount}
+    totalItemsCount={totalItemsCount}
   />
 )}    
      {adminView === "orders" && (
@@ -1413,6 +1442,7 @@ const renderProductDetails = () => {
   return (
     <div className={`app ${isArabic ? "rtl" : "ltr"}`} dir={isArabic ? "rtl" : "ltr"}>
       <Navbar
+      navContainerRef={navContainerRef}
       language={language}
         isArabic={isArabic}
         categories={categories}

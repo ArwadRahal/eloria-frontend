@@ -3,6 +3,7 @@ function AdminDashboardCards({
   pendingOrders,
   deliveredOrders,
   totalProductsCount,
+  totalItemsCount,
   lowStockProductsCount,
   outOfStockProductsCount
 }) {
@@ -29,6 +30,11 @@ function AdminDashboardCards({
       </div>
 
       <div className="admin-home-card">
+        <h3>{totalItemsCount}</h3>
+        <p>Total Items in Stock</p>
+      </div>
+
+      <div className="admin-home-card">
         <h3>{lowStockProductsCount}</h3>
         <p>Low Stock</p>
       </div>
@@ -40,5 +46,4 @@ function AdminDashboardCards({
     </div>
   );
 }
-
 export default AdminDashboardCards;

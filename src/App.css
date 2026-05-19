@@ -1007,3 +1007,39 @@ button:disabled { opacity: .7; cursor: not-allowed !important; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .001ms !important; }
 }
+@media (max-width: 768px) {
+
+  .products-container {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 0 12px 30px;
+  }
+
+  .product-image-wrap {
+    height: 220px;
+    padding: 10px;
+  }
+
+  .product-image {
+    object-fit: contain;
+    transform: scale(1.12);
+  }
+
+  .product-card-body {
+    padding: 12px;
+  }
+
+  .product-card h3 {
+    font-size: 13px;
+    min-height: 38px;
+  }
+
+  .product-price {
+    font-size: 16px;
+  }
+
+  .add-cart-btn {
+    padding: 10px;
+    font-size: 13px;
+  }
+}
