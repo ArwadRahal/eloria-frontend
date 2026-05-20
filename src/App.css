@@ -1083,3 +1083,76 @@ nav-center {
     padding: 8px 10px;
   }
 }
+@media (max-width: 900px) {
+
+  .luxury-navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+
+    padding: 10px 12px;
+
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    grid-template-columns: 55px 1fr auto;
+
+    height: auto;
+    min-height: 72px;
+
+    gap: 8px;
+  }
+
+  .luxury-logo img {
+    width: 48px;
+    height: 48px;
+  }
+
+  .nav-center {
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    grid-column: 1 / -1;
+
+    padding-top: 8px;
+  }
+
+  .nav-center::-webkit-scrollbar {
+    display: none;
+  }
+
+  .nav-category-loop {
+    gap: 18px;
+  }
+
+  .nav-marquee button {
+    font-size: 13px;
+  }
+
+  .nav-right {
+    gap: 6px;
+  }
+
+  .nav-icon-btn,
+  .clean-language-btn {
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .hero-video-section {
+    height: 92vh;
+    min-height: 650px;
+  }
+
+  .hero-video {
+    object-fit: cover;
+    object-position: center center;
+    transform: scale(1.15);
+  }
+
+  .hero-content {
+    padding: 0 22px;
+  }
+}
