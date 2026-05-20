@@ -160,11 +160,19 @@ const t = {
       "Discover curated beauty favorites designed to make every look feel elegant, modern, and uniquely yours.",
     shopNow: "Shop Now",
     whoTag: "WHO WE ARE",
-    whoTitle: "Two best friends, one soft dream — ELORIA",
-    whoP1:
-      "ELORIA began in 2026 with two best friends, Ayman and Arwad, who wanted to turn their friendship into something beautiful and meaningful.",
-    whoP2:
-      "For us, ELORIA is more than a beauty store. It is a space full of glow, warmth, confidence, and lovely little details.",
+    whoTitle: "More than beauty — a story growing with us ✨",
+
+whoP1:
+  "ELORIA was built from a friendship that grew through difficult moments, big dreams, and endless support for one another.",
+
+whoP2:
+  "What started as a simple idea slowly became something much more meaningful to us — a place created with love, care, and the hope of building something that keeps growing every day.",
+
+whoP3:
+  "We believe beautiful things take time, passion, and heart. That’s why every product, every detail, and every step we take is chosen with genuine love for the people who support us.",
+
+whoP4:
+  "ELORIA is not only about beauty products. It’s about creating something real, growing together, and turning small dreams into a future full of possibilities ✨",
     founded: "Founded in 2026",
     connectTag: "CONNECT WITH US",
     instagramTitle: "Follow our glow on Instagram",
@@ -215,11 +223,19 @@ const t = {
       "اكتشفي منتجات مختارة بعناية لتضيف لمستك الأنثوية الناعمة لكل إطلالة.",
     shopNow: "تسوّقي الآن",
     whoTag: "من نحن",
-    whoTitle: "صديقتان وحلم جميل اسمه ELORIA",
-    whoP1:
-      "بدأت ELORIA في عام 2026 على يد صديقتين، أيمان وأرواد، قررتا تحويل الصداقة والحب للجمال إلى مشروع يحمل روحًا ناعمة ومميزة.",
-    whoP2:
-      "بالنسبة لنا، ELORIA ليست مجرد متجر. هي مساحة مليئة بالدفء، الثقة، اللمعان، والتفاصيل الصغيرة التي تجعل تجربة التسوق ألطف.",
+    whoTitle: "أكثر من متجر… حكاية تكبر معنا ✨",
+
+whoP1:
+  "ELORIA بدأت من صداقة كبرت معنا خلال اللحظات الصعبة، والأحلام الكبيرة، والدعم الذي لم ينقطع بيننا يومًا.",
+
+whoP2:
+  "ما بدأ كفكرة بسيطة تحوّل مع الوقت إلى شيء أعمق وأقرب لقلوبنا — مساحة صنعناها بحب، واهتمام، وإيمان بأن الأحلام الصغيرة قادرة أن تكبر يومًا بعد يوم.",
+
+whoP3:
+  "نحن نؤمن أن كل شيء جميل يحتاج شغفًا، وصبرًا، وقلبًا حقيقيًا خلفه. لهذا، كل منتج، وكل تفصيل، وكل خطوة في ELORIA يتم اختيارها بمحبة صادقة لكل شخص يدعمنا ويثق بنا.",
+
+whoP4:
+  "ELORIA ليست مجرد متجر للجمال، بل رحلة نمو، وحلم يكبر معنا، ورسالة نضع فيها حبنا الحقيقي في كل ما نقدّمه ✨",
     founded: "تأسست عام 2026",
     connectTag: "تواصلي معنا",
     instagramTitle: "تابعي لمعتنا على إنستغرام",
@@ -1478,7 +1494,9 @@ const renderProductDetails = () => {
                 <p className="section-tag">{t[language].whoTag}</p>
                 <h2>{t[language].whoTitle}</h2>
                 <p className="who-we-are-description">{t[language].whoP1}</p>
-                <p className="who-we-are-description">{t[language].whoP2}</p>
+<p className="who-we-are-description">{t[language].whoP2}</p>
+<p className="who-we-are-description">{t[language].whoP3}</p>
+<p className="who-we-are-description">{t[language].whoP4}</p>
               </div>
 
               <div className="who-we-are-logo-box">
